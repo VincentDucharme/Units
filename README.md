@@ -12,3 +12,7 @@ Units allow you to seamlessly convert unit from a valid type to another. Compile
 
 Your comments are welcome to improve the library!
 
+# To be added soon :
+- Tutorials and documentation
+- Math helper library using Units (mostly useful for trigonometry)
+
