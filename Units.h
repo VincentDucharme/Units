@@ -51,10 +51,6 @@ class ComposedUnit;
 template<typename U>
 class Vector;
 
-// Create a matrix with component of type U
-template<typename U>
-class Matrix;
-
 // Base class for Unit
 template<typename U>
 class Unit;
@@ -682,21 +678,6 @@ namespace internals
         }
     };
 
-    /*template<typename U1, typename U2, typename V1, typename V2>
-    struct ChangeFactor< ::ComposedUnit<U1, U2>, ::ComposedUnit<V1, V2> >
-    {
-        constexpr static double GetFactor()
-        {
-            // TODO :: Validate
-            return ChangeFactor<U1, V1>::GetFactor() * ChangeFactor<U1, V2>::GetFactor() * ChangeFactor<U2, V1>::GetFactor() * ChangeFactor<U2, V2>::GetFactor();//  GetChangeFactorBase<GetScale<U>::Num, GetScale<U>::Den, GetScale<V>::Num, GetScale<V>::Den, GetPower<V>::Num, GetPower<V>::Den>::GetFactor();
-        }
-
-        constexpr static double GetValue(double value)
-        {
-            return value * GetFactor();
-        }
-    };*/
-
     template<typename U>
     struct ChangeFactor<U, U>
     {
@@ -919,9 +900,6 @@ namespace internals
     template<typename U, typename V>
     struct TransformBase
     {
-        //typedef typename Transform<U, V>::ReturnTypeMultiply MultiplyResultType;
-        //typedef typename Transform<U, V>::ReturnTypeDivide DivideResultType;
-
         constexpr static bool FindMultiply = Transform<U, V>::Find;
         constexpr static bool FindDivide = Transform<U, V>::Find;
 
@@ -950,22 +928,9 @@ namespace internals
         using DivideType = TransformBase<typename TransformBase<U, U2>::ReturnTypeDivide, U1>;
         using ReturnTypeDivide = typename DivideType::ReturnTypeDivide;
 
-        //typedef typename TransformBase<U, U2>::ReturnTypeMultiply IntermediateMultiplyType;
-        //typedef TransformBase<IntermediateMultiplyType, U1> MultiplyType;
-        //typedef typename MultiplyType::ReturnTypeMultiply ReturnTypeMultiply;
-
-        //typedef typename TransformBase<U, U2>::ReturnTypeDivide IntermediateDivideType;
-        //typedef TransformBase<typename TransformBase<U, U2>::ReturnTypeDivide, U1> DivideType;
-        //typedef typename DivideType::ReturnTypeDivide ReturnTypeDivide;
-
         constexpr static bool FindMultiply = MultiplyType::FindMultiply;
         constexpr static bool FindDivide = DivideType::FindDivide;
-        /*enum
-        {
-        FindMultiply = MultiplyType::FindMultiply,
-        FindDivide = DivideType::FindDivide
-        };*/
-
+        
         constexpr static double GetChangeFactorMultiply()
         {
             return MultiplyType::GetChangeFactorMultiply() * TransformBase<U, U2>::GetChangeFactorMultiply();
@@ -1018,92 +983,8 @@ namespace internals
 
 
     ////////////////////////////////////////////
-    // To test if two ComposedUnit are equals
+    // To test if two Units are equivalent
     ////////////////////////////////////////////
-    /*template<typename U, typename V>
-    struct BaseComposedEqual
-    {
-    enum { Find = 0 };
-    };
-
-    template<typename U, int64 N, int64 D, typename UBase, typename V>
-    struct BaseComposedEqual< ::ScaledUnit<U, N, D, UBase>, V>
-    {
-    enum { Find = IsSameTypes<typename GetBaseUnit<V>::BaseUnit, UBase>::Result };
-
-    constexpr static double GetChangeFactor()
-    {
-    return (Find ? ChangeFactor< ::ScaledUnit<U, N, D, UBase>, V>::GetFactor() : 1.0);
-    }
-    };
-
-    template<typename U, int N, int D, typename UBase, typename V>
-    struct BaseComposedEqual< ::PoweredUnit<U, N, D, UBase>, V>
-    {
-    enum { Find = IsSameTypes<typename GetBaseUnit<V>::BaseUnit, UBase>::Result && N == GetPower<V>::Num && D == GetPower<V>::Den };
-
-    constexpr static double GetChangeFactor()
-    {
-    return (Find ? ChangeFactor< ::PoweredUnit<U, N, D, UBase>, V>::GetFactor() : 1.0);
-    }
-    };
-
-    template<typename U1, typename U2, typename V>
-    struct BaseComposedEqual< ::ComposedUnit<U1, U2>, V>
-    {
-    enum { Find = BaseComposedEqual<U1, V>::Find || BaseComposedEqual<U2, V>::Find };
-
-    constexpr static double GetChangeFactor()
-    {
-    // GetChangeFactor return 1 if no match found
-    //double changeFactorU1 = BaseComposedEqual<U1, V>::GetChangeFactor();
-    //double changeFactorU2 = BaseComposedEqual<U2, V>::GetChangeFactor();
-    return BaseComposedEqual<U1, V>::GetChangeFactor() * BaseComposedEqual<U2, V>::GetChangeFactor();
-    }
-    };
-
-
-    template<typename U, typename V>
-    struct ComposedEqual
-    {
-    enum{ Find = BaseComposedEqual<U, V>::Find };
-
-    constexpr static double GetChangeFactor()
-    {
-    return BaseComposedEqual<U, V>::GetChangeFactor();
-    }
-    };
-
-    template<typename U1, typename U2, typename U>
-    struct ComposedEqual<U, ::ComposedUnit<U1, U2> >
-    {
-    enum { Find = ComposedEqual<U, U2>::Find && ComposedEqual<U, U1>::Find };
-
-    constexpr static double GetChangeFactor()
-    {
-    // GetChangeFactor return 1 if no match found
-    return ComposedEqual<U, U2>::GetChangeFactor() * ComposedEqual<U, U1>::GetChangeFactor();
-    }
-    };
-
-
-    template<typename U, typename V>
-    struct ComposedExactlyEqual;
-
-    template<typename U1, typename U2, typename V1, typename V2>
-    struct ComposedExactlyEqual< ::ComposedUnit<U1, U2>, ::ComposedUnit<V1, V2> >
-    {
-    enum { Equal = ComposedEqual< ::ComposedUnit<U1, U2>, ::ComposedUnit<V1, V2> >::Find && ComposedEqual< ::ComposedUnit<V1, V2>, ::ComposedUnit<U1, U2> >::Find };
-    typedef typename IfElseType<Equal, ::ComposedUnit<V1, V2>, ::ComposedUnit<U1, U2> >::Type Type;
-
-    constexpr static double GetChangeFactor()
-    {
-    return ComposedEqual< ::ComposedUnit<U1, U2>, ::ComposedUnit<V1, V2> >::GetChangeFactor();
-    }
-    };*/
-
-
-
     template<typename U, typename V>
     struct IsTransformableTo
     {
@@ -1154,7 +1035,7 @@ namespace internals
     template<typename U, typename V>
     struct IsEquivalent
     {
-        constexpr static bool Result = IsTransformableTo<U, V>::Result; // ComposedEqual<U, V>::Find;
+        constexpr static bool Result = IsTransformableTo<U, V>::Result;
 
         constexpr static double GetFactor()
         {
@@ -1165,7 +1046,7 @@ namespace internals
     template<typename U1, typename U2, typename V1, typename V2>
     struct IsEquivalent < ::ComposedUnit<U1, U2>, ::ComposedUnit<V1, V2> >
     {
-        constexpr static bool Result = IsInSet< ::ComposedUnit<U1, U2>, ::ComposedUnit<V1, V2> >::Result && IsInSet<::ComposedUnit<V1, V2>, ::ComposedUnit<U1, U2> >::Result; //ComposedExactlyEqual<::ComposedUnit<U1, U2>, ::ComposedUnit<V1, V2> >::Equal;
+        constexpr static bool Result = IsInSet< ::ComposedUnit<U1, U2>, ::ComposedUnit<V1, V2> >::Result && IsInSet<::ComposedUnit<V1, V2>, ::ComposedUnit<U1, U2> >::Result;
 
         constexpr static double GetFactor()
         {
@@ -1559,9 +1440,6 @@ public:
     struct OperatorResultType // Otherwise, handle by the ComposedUnit
     {
         // Because we can't explicitly specialize the template into another template class, we must test if the T is the same as the U typename
-        //typedef typename ::internals::IfElseType<N + D == 0, Scalar, PoweredUnit<U, N + D, D, UBase> >::Type SameAsUMultiplyType;
-        //typedef typename ::internals::IfElseType<N - D == 1, U, typename ::internals::IfElseType<N - D == 0, Scalar, PoweredUnit<U, N - D, D, UBase> >::Type>::Type SameAsUDivideType;
-
         using MultiplyType = typename ::internals::IfElseType< ::internals::IsSameTypes<T, U>::Result, typename ::internals::IfElseType<N + D == 0, Scalar, PoweredUnit<U, N + D, D, UBase> >::Type, PoweredUnit<U, N, D, UBase> >::Type;
         using DivideType   = typename ::internals::IfElseType< ::internals::IsSameTypes<T, U>::Result, typename ::internals::IfElseType<N - D == 1, U, typename ::internals::IfElseType<N - D == 0, Scalar, PoweredUnit<U, N - D, D, UBase> >::Type>::Type, PoweredUnit<U, N, D, UBase> >::Type;
     };
@@ -1817,6 +1695,7 @@ public:
     // Make accessible operator* from base class (Unit<U>)
     using Unit<ComposedUnit<U1, U2> >::operator*;
 
+    // Multiply by Another Unit -> ComposedUnit
     template<typename V>
     typename ::internals::EnableIf<::internals::IsUnit<V>::Result, typename ::internals::TransformUnit<ComposedUnit<U1, U2>, V>::MultiplyType>::EnableType operator*(const V& u) const
     {
@@ -1824,33 +1703,6 @@ public:
 
         return ReturnType::Multiply(*this, u);
     }
-
-    // Multiply by Another Unit -> ComposedUnit
-    /*template<typename U, int64 N, int64 D, typename UBase>
-    typename ::internals::TransformUnit<ComposedUnit<U1, U2>, ScaledUnit<U, N, D, UBase> >::MultiplyType operator*(const ScaledUnit<U, N, D, UBase>& u) const
-    {
-    using ReturnType = ::internals::TransformUnit<ComposedUnit<U1, U2>, ScaledUnit<U, N, D, UBase> >;
-
-    return ReturnType::Multiply(*this, u);
-    }
-
-    // Multiply by Another Unit -> ComposedUnit
-    template<typename U, int32 N, int32 D, typename UBase>
-    typename ::internals::TransformUnit<ComposedUnit<U1, U2>, PoweredUnit<U, N, D, UBase> >::MultiplyType operator*(const PoweredUnit<U, N, D, UBase>& u) const
-    {
-    using ReturnType = ::internals::TransformUnit<ComposedUnit<U1, U2>, PoweredUnit<U, N, D, UBase> >;
-
-    return ReturnType::Multiply(*this, u);
-    }
-
-    // Multiply by Another Unit -> ComposedUnit
-    template<typename V1, typename V2>
-    typename ::internals::TransformUnit<ComposedUnit<U1, U2>, ComposedUnit<V1, V2> >::MultiplyType operator*(const ComposedUnit<V1, V2>& u) const
-    {
-    using ReturnType = ::internals::TransformUnit<ComposedUnit<U1, U2>, ComposedUnit<V1, V2> >;
-
-    return ReturnType::Multiply(*this, u);
-    }*/
 
     // Multiply by self -> PoweredUnit
     typename ::internals::TransformUnit<ComposedUnit<U1, U2>, ComposedUnit<U1, U2> >::MultiplyType operator*(const ComposedUnit<U1, U2>& u) const
@@ -1928,15 +1780,6 @@ public:
         v[1] = ypos;
         v[2] = zpos;
     }
-
-    /*template<typename V1, typename V2>
-    Vector(const Vector<ComposedUnit<V1, V2> >& u, typename ::internals::EnableIf< ::internals::IsEquivalent<U, ComposedUnit<V1, V2> >::Result>::EnableType* dummy = 0)
-    {
-    double changeFactor = ::internals::IsEquivalent<U, ComposedUnit<V1, V2> >::GetFactor();
-    v[0] = U(u.x().Value() * changeFactor);
-    v[1] = U(u.y().Value() * changeFactor);
-    v[2] = U(u.z().Value() * changeFactor);
-    }*/
 
     template<typename V>
     Vector(const Vector<V>& u, typename ::internals::EnableIf< ::internals::IsEquivalent<U, V>::Result>::EnableType* dummy = 0)
@@ -2052,15 +1895,6 @@ public:
         return *this;
     }
 
-    /*template<typename V1, typename V2>
-    typename ::internals::EnableIf< ::internals::IsEquivalent<U, ComposedUnit<V1, V2> >::Result, Vector<U> >::EnableType& operator=(const Vector<ComposedUnit<V1, V2> >& vec)
-    {
-    v[0] = vec.x();
-    v[1] = vec.y();
-    v[2] = vec.z();
-    return *this;
-    }*/
-
     //////////////////////////////////////
     // Coumpound assigment operators
     //////////////////////////////////////
@@ -2145,7 +1979,6 @@ public:
     // Vector<U> * V
     template<typename V>
     typename ::internals::EnableIf<::internals::IsUnit<V>::Result || ::internals::IsScalar<V>::Result, Vector<typename ::internals::TransformUnit<U, V>::MultiplyType> >::EnableType operator*(const V& u) const
-    //typename ::internals::EnableIf<!::internals::IsArithmetic<V>::Result || ::internals::IsScalar<V>::Result, Vector<typename ::internals::TransformUnit<U, V>::MultiplyType > >::EnableType operator*(const V& u) const
     {
         using UnitTransformType = ::internals::TransformUnit<U, V>;
         using ReturnType = typename ::internals::TransformUnit<U, V>::MultiplyType;
@@ -2165,7 +1998,6 @@ public:
     // Vector<U> / V
     template<typename V>
     typename ::internals::EnableIf<::internals::IsUnit<V>::Result || ::internals::IsScalar<V>::Result, Vector<typename ::internals::TransformUnit<U, V>::DivideType> >::EnableType operator/(const V& u) const
-    //typename ::internals::EnableIf<!::internals::IsArithmetic<V>::Result || ::internals::IsScalar<V>::Result, Vector<typename ::internals::TransformUnit<U, V>::DivideType > >::EnableType operator/(const V& u) const
     {
         using UnitTransformType = ::internals::TransformUnit<U, V>;
         using ReturnType = typename ::internals::TransformUnit<U, V>::DivideType;
@@ -2241,10 +2073,6 @@ template<typename U, typename V>
 typename ::internals::EnableIf<::internals::IsUnit<U>::Result, Vector<typename ::internals::TransformUnit<U, V>::MultiplyType> >::EnableType operator*(const U& u, const Vector<V>& v)
 {
     return v * u;
-    //using UnitTransformType = ::internals::TransformUnit<U, V>;
-    //using ReturnType = typename ::internals::TransformUnit<U, V>::MultiplyType;
-
-    //return Vector<ReturnType>(UnitTransformType::Multiply(u, v.x()), UnitTransformType::Multiply(u, v.y()), UnitTransformType::Multiply(u, v.z()));
 }
 
 
@@ -2263,298 +2091,6 @@ Vector<U> abs(const Vector<U>& v)
 {
     return Vector<U>(abs(v.x()), abs(v.y()), abs(v.z()));
 }
-
-
-/*template<typename U>
-class Matrix
-{
-public:
-    static const unsigned int DIMENSION = 4;
-
-    Matrix()
-    {
-        m[0][0] = U(1.0);
-        m[0][1] = U(0.0);
-        m[0][2] = U(0.0);
-        m[0][3] = U(0.0);
-
-        m[1][0] = U(0.0);
-        m[1][1] = U(1.0);
-        m[1][2] = U(0.0);
-        m[1][3] = U(0.0);
-
-        m[2][0] = U(0.0);
-        m[2][1] = U(0.0);
-        m[2][2] = U(1.0);
-        m[2][3] = U(0.0);
-
-        m[3][0] = U(0.0);
-        m[3][1] = U(0.0);
-        m[3][2] = U(0.0);
-        m[3][3] = U(1.0);
-    }
-
-    Matrix(Vector<U> line1, Vector<U> line2, Vector<U> line3)
-    {
-        m[0][0] = line1.x();
-        v[0][1] = line2.x();
-        v[0][2] = line3.x();
-        v[0][3] = U(0.0);
-
-        v[1][0] = line1.y();
-        v[1][1] = line2.y();
-        v[1][2] = line3.y();
-        v[1][3] = U(0.0);
-
-        v[2][0] = line1.z();
-        v[2][1] = line2.z();
-        v[2][2] = line3.z();
-        v[2][3] = U(0.0);
-
-        v[3][0] = U(0.0);
-        v[3][1] = U(0.0);
-        v[3][2] = U(0.0);
-        v[3][3] = U(1.0);
-    }
-
-    template<typename V1, typename V2>
-    Matrix(const Matrix<ComposedUnit<V1, V2> >& u, typename ::internals::EnableIf< ::internals::IsEquivalent<U, ComposedUnit<V1, V2> >::Result>::EnableType* dummy = 0)
-    {
-        double changeFactor = ::internals::IsEquivalent<U, ComposedUnit<V1, V2> >::GetFactor();
-        m[0][0] = U(u.m[0][0].Value() * changeFactor);
-        m[0][1] = U(u.m[0][1].Value() * changeFactor);
-        m[0][2] = U(u.m[0][2].Value() * changeFactor);
-        m[0][3] = U(u.m[0][3].Value() * changeFactor);
-
-        m[1][0] = U(u.m[1][0].Value() * changeFactor);
-        m[1][1] = U(u.m[1][1].Value() * changeFactor);
-        m[1][2] = U(u.m[1][2].Value() * changeFactor);
-        m[1][3] = U(u.m[1][3].Value() * changeFactor);
-
-        m[2][0] = U(u.m[2][0].Value() * changeFactor);
-        m[2][1] = U(u.m[2][1].Value() * changeFactor);
-        m[2][2] = U(u.m[2][2].Value() * changeFactor);
-        m[2][3] = U(u.m[2][3].Value() * changeFactor);
-
-        m[3][0] = U(u.m[3][0].Value() * changeFactor);
-        m[3][1] = U(u.m[3][1].Value() * changeFactor);
-        m[3][2] = U(u.m[3][2].Value() * changeFactor);
-        m[3][3] = U(u.m[3][3].Value() * changeFactor);
-    }
-
-    template<typename V>
-    Matrix(const Matrix<V>& u, typename ::internals::EnableIf< ::internals::IsEquivalent<V, U>::Result>::EnableType* dummy = 0)
-    {
-        double changeFactor = ::internals::ChangeFactor<U, V>::GetFactor();
-        m[0][0] = U(u.m[0][0].Value() * changeFactor);
-        m[0][1] = U(u.m[0][1].Value() * changeFactor);
-        m[0][2] = U(u.m[0][2].Value() * changeFactor);
-        m[0][3] = U(u.m[0][3].Value() * changeFactor);
-
-        m[1][0] = U(u.m[1][0].Value() * changeFactor);
-        m[1][1] = U(u.m[1][1].Value() * changeFactor);
-        m[1][2] = U(u.m[1][2].Value() * changeFactor);
-        m[1][3] = U(u.m[1][3].Value() * changeFactor);
-
-        m[2][0] = U(u.m[2][0].Value() * changeFactor);
-        m[2][1] = U(u.m[2][1].Value() * changeFactor);
-        m[2][2] = U(u.m[2][2].Value() * changeFactor);
-        m[2][3] = U(u.m[2][3].Value() * changeFactor);
-
-        m[3][0] = U(u.m[3][0].Value() * changeFactor);
-        m[3][1] = U(u.m[3][1].Value() * changeFactor);
-        m[3][2] = U(u.m[3][2].Value() * changeFactor);
-        m[3][3] = U(u.m[3][3].Value() * changeFactor);
-    }
-
-    Vector<U> getColumn(int index) const
-    {
-        return Vector<U>(m[index][0], m[index][1], m[index][2]);
-    }
-
-    Vector<U> getRow(int index) const
-    {
-        return Vector<U>(m[0][index], m[1][index], m[2][index]);
-    }
-
-    U& operator[](unsigned int row)
-    {
-        return (row < DIMENSION) ? m[0][row] : m[0];
-    }
-
-    U operator[](unsigned int row) const
-    {
-        return (row < DIMENSION) ? m[0][row] : m[0];
-    }
-
-    //////////////////////////////////////
-    // Assignation operators
-    //////////////////////////////////////
-    template<typename U2>
-    typename ::internals::EnableIf< ::internals::IsEquivalent<U, U2>::Result, Vector<U> >::EnableType& operator=(const Vector<U2>& vec)
-    {
-        //if (this == &vec)
-        //    return *this;
-
-        v[0] = vec.x();
-        v[1] = vec.y();
-        v[2] = vec.z();
-        return *this;
-    }
-
-    template<typename V1, typename V2>
-    typename ::internals::EnableIf< ::internals::IsEquivalent<U, ComposedUnit<V1, V2> >::Result, Vector<U> >::EnableType& operator=(const Vector<ComposedUnit<V1, V2> >& vec)
-    {
-        //if (this == &vec)
-        //    return *this;
-
-        v[0] = vec.x();
-        v[1] = vec.y();
-        v[2] = vec.z();
-        return *this;
-    }
-
-    //////////////////////////////////////
-    // Coumpound assigment operators
-    //////////////////////////////////////
-    template<typename U2>
-    typename ::internals::EnableIf< ::internals::IsEquivalent<U, U2>::Result, Vector<U> >::EnableType &operator+=(const Vector<U2> &vector)
-    {
-        v[0] += vector.x();
-        v[1] += vector.y();
-        v[2] += vector.z();
-        return *this;
-    }
-
-    template<typename U2>
-    typename ::internals::EnableIf< ::internals::IsEquivalent<U, U2>::Result, Vector<U> >::EnableType &operator-=(const Vector<U2> &vector)
-    {
-        v[0] -= vector.x();
-        v[1] -= vector.y();
-        v[2] -= vector.z();
-        return *this;
-    }
-
-    Vector<U> &operator*=(double factor)
-    {
-        v[0] *= factor;
-        v[1] *= factor;
-        v[2] *= factor;
-        return *this;
-    }
-
-    Vector<U> &operator/=(double divisor)
-    {
-        v[0] /= divisor;
-        v[1] /= divisor;
-        v[2] /= divisor;
-        return *this;
-    }
-
-    //////////////////////////////////////
-    // Equality operators
-    //////////////////////////////////////
-    template<typename U2>
-    typename ::internals::EnableIf< ::internals::IsEquivalent<U, U2>::Result, bool>::EnableType operator==(const Vector<U2> &v2) const
-    {
-        return v[0] == v2.x() && v[1] == v2.y() && v[2] == v2.z();
-    }
-
-    template<typename U2>
-    typename ::internals::EnableIf< ::internals::IsEquivalent<U, U2>::Result, bool>::EnableType operator!=(const Vector<U2> &v2) const
-    {
-        return !(*this == v2);
-    }
-
-
-    //////////////////////////////////////
-    // Addition/Substraction operators
-    //////////////////////////////////////
-    template<typename U2>
-    typename ::internals::EnableIf< ::internals::IsEquivalent<U, U2>::Result, Vector<U> >::EnableType operator+(const Vector<U2> &v2) const
-    {
-        return Vector<U>(v[0] + v2.x(), v[1] + v2.y(), v[2] + v2.z());
-    }
-
-    template<typename U2>
-    typename ::internals::EnableIf< ::internals::IsEquivalent<U, U2>::Result, Vector<U> >::EnableType operator-(const Vector<U2> &v2) const
-    {
-        return Vector<U>(v[0] - v2.x(), v[1] - v2.y(), v[2] - v2.z());
-    }
-
-
-    //////////////////////////////////////
-    // Multiplication operators
-    //////////////////////////////////////
-    // Vector<U> *  double
-    Vector<U> operator*(double factor) const
-    {
-        return Vector<U>(v[0] * factor, v[1] * factor, v[2] * factor);
-    }
-
-    // Vector<U> * V
-    template<typename V>
-    Vector<typename ::internals::TransformUnit<U, V>::MultiplyType > operator*(const V& u) const
-    {
-        typedef ::internals::TransformUnit<U, V> TransformType;
-        typedef ::internals::TransformUnit<U, V>::MultiplyType MultiplyType;
-        return Vector<typename MultiplyType>(typename TransformType::Multiply(v[0], u), typename TransformType::Multiply(v[1], u), typename TransformType::Multiply(v[2], u));
-    }
-
-    // Vector<U> * Vector<double> Component multiplication
-    Vector<U> operator*(const Vector<Scalar> &v2) const
-    {
-        return Vector<U>(v[0] * v2.x(), v[1] * v2.y(), v[2] * v2.z());
-    }
-
-    //////////////////////////////////////
-    // Division operators
-    //////////////////////////////////////
-    // Vector<U> / V
-    template<typename V>
-    Vector<typename ::internals::TransformUnit<U, V>::DivideType > operator/(const V& u) const
-    {
-        typedef ::internals::TransformUnit<U, V> TransformType;
-        typedef ::internals::TransformUnit<U, V>::DivideType DivideType;
-        return Vector<DivideType>(TransformType::Divide(v[0], u), TransformType::Divide(v[1], u), TransformType::Divide(v[2], u));
-    }
-
-    // Vector<U> / double
-    Vector<U> operator/(double divisor)
-    {
-        return Vector<U>(v[0] / divisor, v[1] / divisor, v[2] / divisor);
-    }
-
-    //////////////////////////////////////
-    // Other operator functions
-    //////////////////////////////////////
-    Vector<U> operator-() const
-    {
-        return Vector<U>(-v[0], -v[1], -v[2]);
-    }
-
-    //////////////////////////////////////
-    // Components functions
-    //////////////////////////////////////
-    template <typename U2>
-    Vector<U> ParallelComponent(const Vector<U2>& v1) const
-    {
-        return (dotProduct(v1) / v1.lengthSquared()) * v1;
-    }
-
-    template <typename U2>
-    Vector<U> PerpendicularComponent(const Vector<U2>& v1) const
-    {
-        return *this - ParallelComponent(v1);
-    }
-
-    // Transform to scalar vector (remove units)
-    Vector<Scalar> ToScalar() const { return Vector<Scalar>(Scalar(v[0].Value()), Scalar(v[1].Value()), Scalar(v[2].Value())); }
-
-private:
-    // Representation is [Col][Row]
-    U m[DIMENSION][DIMENSION];
-};*/
 
 
 ////////////////////////////////////////////
