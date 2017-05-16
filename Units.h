@@ -1039,7 +1039,7 @@ namespace internals
 
         constexpr static double GetFactor()
         {
-            return Result ? IsTransformableTo<U, V>::Result : 1.0;
+            return Result ? IsTransformableTo<U, V>::GetChangeFactor() : 1.0;
         }
     };
 
@@ -1133,6 +1133,50 @@ namespace internals
         static void Output(S& os)
         {
             os << 'm';
+            outputUnit<U>::Output(os);
+        }
+    };
+    
+    template<typename U>
+    struct outputUnitScaledBase<U, 1, 1000000000>
+    {
+        template<typename S>
+        static void Output(S& os)
+        {
+            os << 'n';
+            outputUnit<U>::Output(os);
+        }
+    };
+
+    template<typename U>
+    struct outputUnitScaledBase<U, 1, 1000000000000>
+    {
+        template<typename S>
+        static void Output(S& os)
+        {
+            os << 'p';
+            outputUnit<U>::Output(os);
+        }
+    };
+
+    template<typename U>
+    struct outputUnitScaledBase<U, 1, 1000000000000000>
+    {
+        template<typename S>
+        static void Output(S& os)
+        {
+            os << 'f';
+            outputUnit<U>::Output(os);
+        }
+    };
+
+    template<typename U>
+    struct outputUnitScaledBase<U, 1, 1000000000000000000>
+    {
+        template<typename S>
+        static void Output(S& os)
+        {
+            os << 'a';
             outputUnit<U>::Output(os);
         }
     };
@@ -2070,7 +2114,7 @@ typename ::internals::EnableIf<::internals::IsArithmetic<F>::Result, Vector<U> >
 
 // Unit * Vector<U>
 template<typename U, typename V>
-typename ::internals::EnableIf<::internals::IsUnit<U>::Result, Vector<typename ::internals::TransformUnit<U, V>::MultiplyType> >::EnableType operator*(const U& u, const Vector<V>& v)
+typename ::internals::EnableIf<::internals::IsUnit<U>::Result || ::internals::IsScalar<U>::Result, Vector<typename ::internals::TransformUnit<V, U>::MultiplyType> >::EnableType operator*(const U& u, const Vector<V>& v)
 {
     return v * u;
 }
