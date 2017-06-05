@@ -8,6 +8,8 @@ Very simple and intuitive to use, this library can save you a lot of trouble fin
 
 Units allow you to seamlessly convert unit from a valid type to another. Compile-time errors are thrown when units error occur in formulas.
 
+Your comments are welcome to improve the library!
+
 # Short example
 
 ```C++
@@ -25,9 +27,7 @@ int main()
 }
 ```
 
-Your comments are welcome to improve the library!
-
 # To be added soon :
-- Tutorials and documentation
+- Complete tutorials and documentation
 - Math helper library using Units (mainly useful for trigonometry)
 
