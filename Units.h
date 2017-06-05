@@ -199,7 +199,7 @@ public:
     }
 
     template<typename F>
-    typename ::internals::EnableIf<::internals::IsArithmetic<F>::Result, Scalar&>::EnableType operator*=(const F& u)
+    typename ::internals::EnableIf< ::internals::IsArithmetic<F>::Result, Scalar&>::EnableType operator*=(const F& u)
     {
         m_value *= u;
         return *this;
@@ -212,7 +212,7 @@ public:
     }
 
     template<typename F>
-    typename ::internals::EnableIf<::internals::IsArithmetic<F>::Result, Scalar&>::EnableType operator/=(const F& u)
+    typename ::internals::EnableIf< ::internals::IsArithmetic<F>::Result, Scalar&>::EnableType operator/=(const F& u)
     {
         m_value /= u;
         return *this;
@@ -235,7 +235,7 @@ public:
     }
 
     template<typename S>
-    friend S& operator>> (S& in, Scalar& s)
+    friend S& operator >> (S& in, Scalar& s)
     {
         return (in >> s.m_value);
     }
@@ -347,7 +347,7 @@ public:
 
     // Multiply by an arithmetic value -> Unit
     template<typename F>
-    typename ::internals::EnableIf<::internals::IsArithmetic<F>::Result, U>::EnableType operator*(const F& u) const
+    typename ::internals::EnableIf< ::internals::IsArithmetic<F>::Result, U>::EnableType operator*(const F& u) const
     {
         return U(m_value * u);
     }
@@ -369,7 +369,7 @@ public:
 
     // Divide by an arithmetic value -> Unit
     template<typename F>
-    typename ::internals::EnableIf<::internals::IsArithmetic<F>::Result, U>::EnableType operator/(const F& u) const
+    typename ::internals::EnableIf< ::internals::IsArithmetic<F>::Result, U>::EnableType operator/(const F& u) const
     {
         return U(m_value / u);
     }
@@ -399,7 +399,7 @@ public:
     }
 
     template<typename F>
-    typename ::internals::EnableIf<::internals::IsArithmetic<F>::Result, U&>::EnableType operator*=(const F& u)
+    typename ::internals::EnableIf< ::internals::IsArithmetic<F>::Result, U&>::EnableType operator*=(const F& u)
     {
         m_value *= u;
         return static_cast<U&>(*this);
@@ -415,7 +415,7 @@ public:
     }
 
     template<typename F>
-    typename ::internals::EnableIf<::internals::IsArithmetic<F>::Result, U&>::EnableType operator/=(const F& u)
+    typename ::internals::EnableIf< ::internals::IsArithmetic<F>::Result, U&>::EnableType operator/=(const F& u)
     {
         m_value /= u;
         return static_cast<U&>(*this);
@@ -463,7 +463,7 @@ public:
     V ToUnit() const { return V(m_value); }
 
     template<typename S>
-    friend S& operator>>(S& is, Unit<U>& u)
+    friend S& operator >> (S& is, Unit<U>& u)
     {
         return (is >> u.m_value);
     }
@@ -482,7 +482,7 @@ U operator*(const Scalar d, const Unit<U>& u)
 
 // Arithmetic value multiply unit
 template<typename F, typename U>
-typename ::internals::EnableIf<::internals::IsArithmetic<F>::Result, U>::EnableType operator*(const F& f, const Unit<U>& u)
+typename ::internals::EnableIf< ::internals::IsArithmetic<F>::Result, U>::EnableType operator*(const F& f, const Unit<U>& u)
 {
     return u * f;
 }
@@ -532,15 +532,6 @@ namespace internals
     struct IsScalar< ::Scalar >
     {
         constexpr static bool Result = true;
-    };
-
-    ////////////////////////////////////////////
-    // Trait for same base unit
-    ////////////////////////////////////////////
-    template<typename U, typename V>
-    struct IsSameBaseUnit
-    {
-        constexpr static bool Result = IsSameTypes<GetBaseUnit<U>::BaseUnit, GetBaseUnit<V>::BaseUnit>::Result;
     };
 
     ////////////////////////////////////////////
@@ -620,6 +611,16 @@ namespace internals
     struct GetBaseUnit< ::PoweredUnit<PV, PN, PD, PUBase> >
     {
         using BaseUnit = PUBase;
+    };
+
+
+    ////////////////////////////////////////////
+    // Trait for same base unit
+    ////////////////////////////////////////////
+    template<typename U, typename V>
+    struct IsSameBaseUnit
+    {
+        constexpr static bool Result = IsSameTypes<typename GetBaseUnit<U>::BaseUnit, typename GetBaseUnit<V>::BaseUnit>::Result;
     };
 
 
@@ -785,8 +786,8 @@ namespace internals
     template<typename U, int32 N, int32 D, typename UBase, int NMult, int DMult>
     struct PowerTransform< ::PoweredUnit<U, N, D, UBase>, NMult, DMult >
     {
-        constexpr static int32 RN = GetPower<::PoweredUnit<U, N, D, UBase> >::Num * NMult;
-        constexpr static int32 RD = GetPower<::PoweredUnit<U, N, D, UBase> >::Den * DMult;
+        constexpr static int32 RN = GetPower< ::PoweredUnit<U, N, D, UBase> >::Num * NMult;
+        constexpr static int32 RD = GetPower< ::PoweredUnit<U, N, D, UBase> >::Den * DMult;
 
         using Type = ::PoweredUnit<U, RN / PGCD<RN, RD>::Value, RD / PGCD<RN, RD>::Value, UBase>;
     };
@@ -930,7 +931,7 @@ namespace internals
 
         constexpr static bool FindMultiply = MultiplyType::FindMultiply;
         constexpr static bool FindDivide = DivideType::FindDivide;
-        
+
         constexpr static double GetChangeFactorMultiply()
         {
             return MultiplyType::GetChangeFactorMultiply() * TransformBase<U, U2>::GetChangeFactorMultiply();
@@ -1046,7 +1047,7 @@ namespace internals
     template<typename U1, typename U2, typename V1, typename V2>
     struct IsEquivalent < ::ComposedUnit<U1, U2>, ::ComposedUnit<V1, V2> >
     {
-        constexpr static bool Result = IsInSet< ::ComposedUnit<U1, U2>, ::ComposedUnit<V1, V2> >::Result && IsInSet<::ComposedUnit<V1, V2>, ::ComposedUnit<U1, U2> >::Result;
+        constexpr static bool Result = IsInSet< ::ComposedUnit<U1, U2>, ::ComposedUnit<V1, V2> >::Result && IsInSet< ::ComposedUnit<V1, V2>, ::ComposedUnit<U1, U2> >::Result;
 
         constexpr static double GetFactor()
         {
@@ -1068,6 +1069,9 @@ namespace internals
         }
     };
 
+    template<typename U, int64 Num, int64 Den>
+    struct outputUnitScaledBase;
+
     // General case for ScaledUnit
     template<typename U, int64 SN, int64 SD, typename UBase>
     struct outputUnit< ::ScaledUnit<U, SN, SD, UBase> >
@@ -1075,7 +1079,7 @@ namespace internals
         template<typename S>
         static void Output(S& os)
         {
-            outputUnitScaledBase<GetBaseUnit<U>::BaseUnit, GetScale<::ScaledUnit<U, SN, SD, UBase> >::Num, GetScale<::ScaledUnit<U, SN, SD, UBase> >::Den>::Output(os);
+            outputUnitScaledBase<typename GetBaseUnit<U>::BaseUnit, GetScale< ::ScaledUnit<U, SN, SD, UBase> >::Num, GetScale< ::ScaledUnit<U, SN, SD, UBase> >::Den>::Output(os);
         }
     };
 
@@ -1136,7 +1140,7 @@ namespace internals
             outputUnit<U>::Output(os);
         }
     };
-    
+
     template<typename U>
     struct outputUnitScaledBase<U, 1, 1000000000>
     {
@@ -1268,7 +1272,7 @@ public:
     ///////////////////////////
     // Constructors
     ///////////////////////////
-    
+
     // From a double value
     explicit ScaledUnit(const double& val = 0.0)
         : Unit<ScaledUnit<U, N, D, UBase> >(val)
@@ -1345,7 +1349,7 @@ public:
     typename OperatorResultType<ScaledUnit<U, N, D, UBase> >::MultiplyType operator*(const ScaledUnit<U, N, D, UBase>& u) const
     {
         using ReturnType = typename OperatorResultType<ScaledUnit<U, N, D, UBase> >::MultiplyType;
-        return ReturnType(Value() * u.Value());
+        return ReturnType(Unit<ScaledUnit<U, N, D, UBase> >::Value() * u.Value());
     }
 
     // Multiply by same baseUnit, Scaled -> PoweredUnit
@@ -1355,7 +1359,7 @@ public:
         using ChangeFactorType = ::internals::ChangeFactor<ScaledUnit<U, N, D, UBase>, ScaledUnit<V, SN, SD, UBase> >;
         using ReturnType = typename OperatorResultType<ScaledUnit<V, SN, SD, UBase> >::MultiplyType;
 
-        return ReturnType(Value() * ChangeFactorType::GetValue(u.Value()));
+        return ReturnType(Unit<ScaledUnit<U, N, D, UBase> >::Value() * ChangeFactorType::GetValue(u.Value()));
     }
 
     // Multiply by PoweredUnit, same baseUnit, same Scaled -> PoweredUnit'
@@ -1364,17 +1368,17 @@ public:
     {
         using ReturnType = typename OperatorResultType<PoweredUnit<ScaledUnit<U, N, D, UBase>, PN, PD, UBase> >::MultiplyType;
 
-        return ReturnType(Value() * u.Value());
+        return ReturnType(Unit<ScaledUnit<U, N, D, UBase> >::Value() * u.Value());
     }
 
     // Multiply by PoweredUnit, same baseUnit, different Scaled -> PoweredUnit'
     template<typename V, int64 SN, int64 SD, int32 PN, int32 PD>
     typename OperatorResultType<PoweredUnit<ScaledUnit<V, SN, SD, UBase>, PN, PD, UBase> >::MultiplyType operator*(const PoweredUnit<ScaledUnit<V, SN, SD, UBase>, PN, PD, UBase>& u) const
     {
-        using ChangeFactorType = ::internals::ChangeFactor<ScaledUnit<U, N, D, UBase>, PoweredUnit<ScaledUnit<V, SN, SD, UBase>, PN, PD> >;
+        using ChangeFactorType = ::internals::ChangeFactor<ScaledUnit<U, N, D, UBase>, PoweredUnit<ScaledUnit<V, SN, SD, UBase>, PN, PD, UBase> >;
         using ReturnType = typename OperatorResultType<PoweredUnit<ScaledUnit<V, SN, SD, UBase>, PN, PD, UBase> >::MultiplyType;
 
-        return ReturnType(Value() * ChangeFactorType::GetValue(u.Value()));
+        return ReturnType(Unit<ScaledUnit<U, N, D, UBase> >::Value() * ChangeFactorType::GetValue(u.Value()));
     }
 
     // Multiply by ScaledUnit, different baseUnit -> ComposedUnit
@@ -1418,17 +1422,17 @@ public:
         using ChangeFactorType = ::internals::ChangeFactor<ScaledUnit<U, N, D, UBase>, ScaledUnit<V, SN, SD, UBase> >;
         using ReturnType = typename OperatorResultType<ScaledUnit<V, SN, SD, UBase> >::DivideType;
 
-        return ReturnType(Value() / ChangeFactorType::GetValue(u.Value()));
+        return ReturnType(Unit<ScaledUnit<U, N, D, UBase> >::Value() / ChangeFactorType::GetValue(u.Value()));
     }
 
     // Divide by PoweredUnit, same baseUnit, different scale -> Powered ScaledUnit
     template<typename V, int32 PN, int32 PD>
     typename OperatorResultType<PoweredUnit<V, PN, PD, UBase> >::DivideType operator/(const PoweredUnit<V, PN, PD, UBase>& u) const
     {
-        using ChangeFactorType = ::internals::ChangeFactor<ScaledUnit<U, N, D, UBase>, PoweredUnit<V, PN, PD> >;
+        using ChangeFactorType = ::internals::ChangeFactor<ScaledUnit<U, N, D, UBase>, PoweredUnit<V, PN, PD, UBase> >;
         using ReturnType = typename OperatorResultType<PoweredUnit<V, PN, PD, UBase> >::DivideType;
 
-        return ReturnType(Value() / ChangeFactorType::GetValue(u.Value()));
+        return ReturnType(Unit<ScaledUnit<U, N, D, UBase> >::Value() / ChangeFactorType::GetValue(u.Value()));
     }
 
     // Divide by PoweredUnit, same baseUnit, same scale -> Powered ScaledUnit
@@ -1437,7 +1441,7 @@ public:
     {
         using ReturnType = typename OperatorResultType<PoweredUnit<ScaledUnit<U, N, D, UBase>, PN, PD, UBase> >::DivideType;
 
-        return ReturnType(Value() / u.Value());
+        return ReturnType(Unit<ScaledUnit<U, N, D, UBase> >::Value() / u.Value());
     }
 
     // Divide by ScaledUnit, different baseUnit -> ComposedUnit and Powered -1 for other ScaledUnit
@@ -1485,24 +1489,24 @@ public:
     {
         // Because we can't explicitly specialize the template into another template class, we must test if the T is the same as the U typename
         using MultiplyType = typename ::internals::IfElseType< ::internals::IsSameTypes<T, U>::Result, typename ::internals::IfElseType<N + D == 0, Scalar, PoweredUnit<U, N + D, D, UBase> >::Type, PoweredUnit<U, N, D, UBase> >::Type;
-        using DivideType   = typename ::internals::IfElseType< ::internals::IsSameTypes<T, U>::Result, typename ::internals::IfElseType<N - D == 1, U, typename ::internals::IfElseType<N - D == 0, Scalar, PoweredUnit<U, N - D, D, UBase> >::Type>::Type, PoweredUnit<U, N, D, UBase> >::Type;
+        using DivideType = typename ::internals::IfElseType< ::internals::IsSameTypes<T, U>::Result, typename ::internals::IfElseType<N - D == 1, U, typename ::internals::IfElseType<N - D == 0, Scalar, PoweredUnit<U, N - D, D, UBase> >::Type>::Type, PoweredUnit<U, N, D, UBase> >::Type;
     };
 
     template<typename V, int64 SN, int64 SD>
     struct OperatorResultType<ScaledUnit<V, SN, SD, UBase> > // Operator by ScaledUnit
     {
         using MultiplyType = typename ::internals::IfElseType<N + D == 0, Scalar, PoweredUnit<U, N + D, D, UBase> >::Type;
-        using DivideType   = typename ::internals::IfElseType<N - D == 1, U, typename ::internals::IfElseType<N - D == 0, Scalar, PoweredUnit<U, N - D, D, UBase> >::Type>::Type;
+        using DivideType = typename ::internals::IfElseType<N - D == 1, U, typename ::internals::IfElseType<N - D == 0, Scalar, PoweredUnit<U, N - D, D, UBase> >::Type>::Type;
     };
 
     template<typename V, int32 PN, int32 PD>
     struct OperatorResultType<PoweredUnit<V, PN, PD, UBase> > // Operator by Powered of the same unit
     {
         constexpr static int32 PGCDMultiply = ::internals::PGCD<(N*PD + D*PN), D*PD>::Value;
-        constexpr static int32 PGCDDivide   = ::internals::PGCD<(N*PD - D*PN), D*PD>::Value;
+        constexpr static int32 PGCDDivide = ::internals::PGCD<(N*PD - D*PN), D*PD>::Value;
 
         using MultiplyType = typename ::internals::IfElseType<(N*PD + D*PN) % (D*PD) == 0, typename ::internals::IfElseType<(N*PD) + (D*PN) == 0, Scalar, typename ::internals::IfElseType<(N*PD) + (PN*D) == (D*PD), U, PoweredUnit<U, ((N*PD) + (D*PN)) / (D*PD), 1, UBase> >::Type>::Type, PoweredUnit<U, ((N*PD) + (PN*D)) / PGCDMultiply, (D*PD) / PGCDMultiply, UBase> >::Type;
-        using DivideType   = typename ::internals::IfElseType<(N*PD - D*PN) % (D*PD) == 0, typename ::internals::IfElseType<(N*PD) - (D*PN) == 0, Scalar, typename ::internals::IfElseType<(N*PD) - (PN*D) == (D*PD), U, PoweredUnit<U, ((N*PD) - (D*PN)) / (D*PD), 1, UBase> >::Type>::Type, PoweredUnit<U, ((N*PD) - (PN*D)) / PGCDMultiply, (D*PD) / PGCDMultiply, UBase> >::Type;
+        using DivideType = typename ::internals::IfElseType<(N*PD - D*PN) % (D*PD) == 0, typename ::internals::IfElseType<(N*PD) - (D*PN) == 0, Scalar, typename ::internals::IfElseType<(N*PD) - (PN*D) == (D*PD), U, PoweredUnit<U, ((N*PD) - (D*PN)) / (D*PD), 1, UBase> >::Type>::Type, PoweredUnit<U, ((N*PD) - (PN*D)) / PGCDMultiply, (D*PD) / PGCDMultiply, UBase> >::Type;
     };
 
 
@@ -1537,7 +1541,7 @@ public:
     {
         using ReturnType = typename OperatorResultType<PoweredUnit<U, -N, D, UBase> >::MultiplyType;
 
-        return ReturnType(Value() * u.Value());
+        return ReturnType(Unit<PoweredUnit<U, N, D, UBase> >::Value() * u.Value());
     }
 
     // Multiply by the unit itself (same scale, power = 1)
@@ -1545,7 +1549,7 @@ public:
     {
         using ReturnType = typename OperatorResultType<U>::MultiplyType;
 
-        return ReturnType(Value() * u.Value());
+        return ReturnType(Unit<PoweredUnit<U, N, D, UBase> >::Value() * u.Value());
     }
 
     // Multiply by a ScaledUnit, with same baseUnit, different scale
@@ -1555,7 +1559,7 @@ public:
         using ChangeFactorType = ::internals::ChangeFactor<U, ScaledUnit<V, SN, SD, UBase> >;
         using ReturnType = typename OperatorResultType<ScaledUnit<V, SN, SD, UBase> >::MultiplyType;
 
-        return ReturnType(Value() * ChangeFactorType::GetValue(u.Value()));
+        return ReturnType(Unit<PoweredUnit<U, N, D, UBase> >::Value() * ChangeFactorType::GetValue(u.Value()));
     }
 
     // Multiply by another PoweredUnit, with the same baseUnit, but different scale and different power
@@ -1565,7 +1569,7 @@ public:
         using ChangeFactorType = ::internals::ChangeFactor<U, PoweredUnit<V, PN2, PD2, UBase> >;
         using ReturnType = typename OperatorResultType<PoweredUnit<V, PN2, PD2, UBase> >::MultiplyType;
 
-        return ReturnType(Value() * ChangeFactorType::GetValue(u.Value()));
+        return ReturnType(Unit<PoweredUnit<U, N, D, UBase> >::Value() * ChangeFactorType::GetValue(u.Value()));
     }
 
     // Multiply by Another PoweredUnit -> ComposedUnit
@@ -1610,7 +1614,7 @@ public:
         using ChangeFactorType = ::internals::ChangeFactor<U, PoweredUnit<V, N, D, UBase> >;
         using ReturnType = typename OperatorResultType<PoweredUnit<V, N, D, UBase> >::DivideType;
 
-        return ReturnType(Value() / ChangeFactorType::GetValue(u.Value()));
+        return ReturnType(Unit<PoweredUnit<U, N, D, UBase> >::Value() / ChangeFactorType::GetValue(u.Value()));
     }
 
     // Divide by a different power of the same unit
@@ -1619,7 +1623,7 @@ public:
     {
         using ReturnType = typename OperatorResultType<PoweredUnit<U, N2, D2, UBase> >::DivideType;
 
-        return ReturnType(Value() / u.Value());
+        return ReturnType(Unit<PoweredUnit<U, N, D, UBase> >::Value() / u.Value());
     }
 
     // Divide by a transformed unit of different power
@@ -1629,7 +1633,7 @@ public:
         using ChangeFactorType = ::internals::ChangeFactor<U, PoweredUnit<V, N2, D2, UBase> >;
         using ReturnType = typename OperatorResultType<PoweredUnit<V, N2, D2, UBase> >::DivideType;
 
-        return ReturnType(Value() / ChangeFactorType::GetValue(u.Value()));
+        return ReturnType(Unit<PoweredUnit<U, N, D, UBase> >::Value() / ChangeFactorType::GetValue(u.Value()));
     }
 
     // Divide by a ScaledUnit of the same baseUnit, different scale -> Scale it, and divide
@@ -1639,7 +1643,7 @@ public:
         using ChangeFactorType = ::internals::ChangeFactor<U, ScaledUnit<V, N2, D2, UBase> >;
         using ReturnType = typename OperatorResultType<ScaledUnit<V, N2, D2, UBase> >::DivideType;
 
-        return ReturnType(Value() / ChangeFactorType::GetValue(u.Value()));
+        return ReturnType(Unit<PoweredUnit<U, N, D, UBase> >::Value() / ChangeFactorType::GetValue(u.Value()));
     }
 
     // Divide by a ScaledUnit of the same baseUnit -> Scale it, and divide
@@ -1647,7 +1651,7 @@ public:
     {
         using ReturnType = typename OperatorResultType<U>::DivideType;
 
-        return ReturnType(Value() / u.Value());
+        return ReturnType(Unit<PoweredUnit<U, N, D, UBase> >::Value() / u.Value());
     }
 
     // Divide by a PoweredUnit of another baseUnit -> Compose it
@@ -1722,7 +1726,7 @@ public:
     ///////////////////////////
     // Assignation operators
     ///////////////////////////
-    using Unit::operator=;
+    using Unit<ComposedUnit<U1, U2> >::operator=;
 
     template<typename V1, typename V2>
     typename ::internals::EnableIf< ::internals::IsEquivalent<ComposedUnit<U1, U2>, ComposedUnit<V1, V2> >::Result, ComposedUnit<U1, U2> >::EnableType& operator=(const ComposedUnit<V1, V2>& v)
@@ -1741,7 +1745,7 @@ public:
 
     // Multiply by Another Unit -> ComposedUnit
     template<typename V>
-    typename ::internals::EnableIf<::internals::IsUnit<V>::Result, typename ::internals::TransformUnit<ComposedUnit<U1, U2>, V>::MultiplyType>::EnableType operator*(const V& u) const
+    typename ::internals::EnableIf< ::internals::IsUnit<V>::Result, typename ::internals::TransformUnit<ComposedUnit<U1, U2>, V>::MultiplyType>::EnableType operator*(const V& u) const
     {
         using ReturnType = ::internals::TransformUnit<ComposedUnit<U1, U2>, V>;
 
@@ -1753,7 +1757,7 @@ public:
     {
         using ReturnType = typename ::internals::TransformUnit<ComposedUnit<U1, U2>, ComposedUnit<U1, U2> >::MultiplyType;
 
-        return ReturnType(Value() * u.Value());
+        return ReturnType(Unit<ComposedUnit<U1, U2> >::Value() * u.Value());
     }
 
 
@@ -1765,7 +1769,7 @@ public:
 
     // Divide by Another Unit -> ComposedUnit
     template<typename V>
-    typename ::internals::EnableIf<::internals::IsUnit<V>::Result, typename ::internals::TransformUnit<ComposedUnit<U1, U2>, V>::DivideType>::EnableType operator/(const V& u) const
+    typename ::internals::EnableIf< ::internals::IsUnit<V>::Result, typename ::internals::TransformUnit<ComposedUnit<U1, U2>, V>::DivideType>::EnableType operator/(const V& u) const
     {
         using ReturnType = ::internals::TransformUnit<ComposedUnit<U1, U2>, V>;
 
@@ -1784,19 +1788,19 @@ typename ::internals::InversePower<U>::Type operator/(const Scalar& d, const Uni
 }
 
 template<typename F, typename U>
-typename ::internals::EnableIf<::internals::IsArithmetic<F>::Result, typename ::internals::InversePower<U>::Type>::EnableType operator/(const F& f, const Unit<U>& u)
+typename ::internals::EnableIf< ::internals::IsArithmetic<F>::Result, typename ::internals::InversePower<U>::Type>::EnableType operator/(const F& f, const Unit<U>& u)
 {
     return ::internals::InversePower<U>::Type(f / u.Value());
 }
 
 template<typename U>
-typename ::internals::SqrtTransform<U>::Type sqrt(const Unit<U>& u)
+typename ::internals::EnableIf< ::internals::IsUnit<U>::Result, typename ::internals::SqrtTransform<U>::Type>::EnableType sqrt(const U& u)
 {
     return typename ::internals::SqrtTransform<U>::Type(sqrt(u.Value()));
 }
 
 template<int32 PowNum, int32 PowDen = 1, typename U>
-typename ::internals::PowerTransform<U, PowNum, PowDen>::Type pow(const Unit<U>& u)
+typename ::internals::EnableIf< ::internals::IsUnit<U>::Result, typename ::internals::PowerTransform<U, PowNum, PowDen>::Type>::EnableType pow(const Unit<U>& u)
 {
     return typename ::internals::PowerTransform<U, PowNum, PowDen>::Type(pow(u.Value(), static_cast<double>(PowNum) / static_cast<double>(PowDen)));
 }
@@ -1961,7 +1965,7 @@ public:
     }
 
     template<typename F>
-    typename ::internals::EnableIf<::internals::IsArithmetic<F>::Result, Vector<U>&>::EnableType operator*=(const F& factor)
+    typename ::internals::EnableIf< ::internals::IsArithmetic<F>::Result, Vector<U>&>::EnableType operator*=(const F& factor)
     {
         v[0] *= factor;
         v[1] *= factor;
@@ -1970,7 +1974,7 @@ public:
     }
 
     template<typename F>
-    typename ::internals::EnableIf<::internals::IsArithmetic<F>::Result, Vector<U>&>::EnableType operator/=(const F& divisor)
+    typename ::internals::EnableIf< ::internals::IsArithmetic<F>::Result, Vector<U>&>::EnableType operator/=(const F& divisor)
     {
         v[0] /= divisor;
         v[1] /= divisor;
@@ -2015,14 +2019,14 @@ public:
     //////////////////////////////////////
     // Vector<U> *  double
     template<typename F>
-    typename ::internals::EnableIf<::internals::IsArithmetic<F>::Result, Vector<U> >::EnableType operator*(const F& factor) const
+    typename ::internals::EnableIf< ::internals::IsArithmetic<F>::Result, Vector<U> >::EnableType operator*(const F& factor) const
     {
         return Vector<U>(v[0] * factor, v[1] * factor, v[2] * factor);
     }
 
     // Vector<U> * V
     template<typename V>
-    typename ::internals::EnableIf<::internals::IsUnit<V>::Result || ::internals::IsScalar<V>::Result, Vector<typename ::internals::TransformUnit<U, V>::MultiplyType> >::EnableType operator*(const V& u) const
+    typename ::internals::EnableIf< ::internals::IsUnit<V>::Result || ::internals::IsScalar<V>::Result, Vector<typename ::internals::TransformUnit<U, V>::MultiplyType> >::EnableType operator*(const V& u) const
     {
         using UnitTransformType = ::internals::TransformUnit<U, V>;
         using ReturnType = typename ::internals::TransformUnit<U, V>::MultiplyType;
@@ -2041,7 +2045,7 @@ public:
     //////////////////////////////////////
     // Vector<U> / V
     template<typename V>
-    typename ::internals::EnableIf<::internals::IsUnit<V>::Result || ::internals::IsScalar<V>::Result, Vector<typename ::internals::TransformUnit<U, V>::DivideType> >::EnableType operator/(const V& u) const
+    typename ::internals::EnableIf< ::internals::IsUnit<V>::Result || ::internals::IsScalar<V>::Result, Vector<typename ::internals::TransformUnit<U, V>::DivideType> >::EnableType operator/(const V& u) const
     {
         using UnitTransformType = ::internals::TransformUnit<U, V>;
         using ReturnType = typename ::internals::TransformUnit<U, V>::DivideType;
@@ -2051,7 +2055,7 @@ public:
 
     // Vector<U> / double
     template<typename F>
-    typename ::internals::EnableIf<::internals::IsArithmetic<F>::Result, Vector<U> >::EnableType operator/(const F& divisor)
+    typename ::internals::EnableIf< ::internals::IsArithmetic<F>::Result, Vector<U> >::EnableType operator/(const F& divisor)
     {
         return Vector<U>(v[0] / divisor, v[1] / divisor, v[2] / divisor);
     }
@@ -2107,14 +2111,14 @@ private:
 ////////////////////////////////////////////
 // double * Vector<U>
 template<typename F, typename U>
-typename ::internals::EnableIf<::internals::IsArithmetic<F>::Result, Vector<U> >::EnableType operator*(const F& factor, const Vector<U> &vector)
+typename ::internals::EnableIf< ::internals::IsArithmetic<F>::Result, Vector<U> >::EnableType operator*(const F& factor, const Vector<U> &vector)
 {
     return vector * factor;
 }
 
 // Unit * Vector<U>
 template<typename U, typename V>
-typename ::internals::EnableIf<::internals::IsUnit<U>::Result || ::internals::IsScalar<U>::Result, Vector<typename ::internals::TransformUnit<V, U>::MultiplyType> >::EnableType operator*(const U& u, const Vector<V>& v)
+typename ::internals::EnableIf< ::internals::IsUnit<U>::Result || ::internals::IsScalar<U>::Result, Vector<typename ::internals::TransformUnit<V, U>::MultiplyType> >::EnableType operator*(const U& u, const Vector<V>& v)
 {
     return v * u;
 }
@@ -2125,7 +2129,7 @@ typename ::internals::EnableIf<::internals::IsUnit<U>::Result || ::internals::Is
 //    For Unit and Vector
 ////////////////////////////////////////////
 template<typename U>
-U abs(const Unit<U>& u)
+typename ::internals::EnableIf< ::internals::IsUnit<U>::Result, U>::EnableType abs(const U& u)
 {
     return U(abs(u.Value()));
 }
@@ -2209,25 +2213,25 @@ struct Scale
 ////////////////////////////////////////////
 template<typename Unit> struct standard { typedef ScaledUnit<Unit> Type; };
 
-template<typename Unit> struct deca  { typedef ScaledUnit<Unit, 10> Type; };
+template<typename Unit> struct deca { typedef ScaledUnit<Unit, 10> Type; };
 template<typename Unit> struct hecto { typedef ScaledUnit<Unit, 100> Type; };
-template<typename Unit> struct kilo  { typedef ScaledUnit<Unit, 1000> Type; };
-template<typename Unit> struct mega  { typedef ScaledUnit<typename kilo<Unit>::Type, 1000> Type; };
-template<typename Unit> struct giga  { typedef ScaledUnit<typename mega<Unit>::Type, 1000> Type; };
-template<typename Unit> struct tera  { typedef ScaledUnit<typename giga<Unit>::Type, 1000> Type; };
-template<typename Unit> struct peta  { typedef ScaledUnit<typename tera<Unit>::Type, 1000> Type; };
-template<typename Unit> struct exa   { typedef ScaledUnit<typename peta<Unit>::Type, 1000> Type; };
+template<typename Unit> struct kilo { typedef ScaledUnit<Unit, 1000> Type; };
+template<typename Unit> struct mega { typedef ScaledUnit<typename kilo<Unit>::Type, 1000> Type; };
+template<typename Unit> struct giga { typedef ScaledUnit<typename mega<Unit>::Type, 1000> Type; };
+template<typename Unit> struct tera { typedef ScaledUnit<typename giga<Unit>::Type, 1000> Type; };
+template<typename Unit> struct peta { typedef ScaledUnit<typename tera<Unit>::Type, 1000> Type; };
+template<typename Unit> struct exa { typedef ScaledUnit<typename peta<Unit>::Type, 1000> Type; };
 template<typename Unit> struct zetta { typedef ScaledUnit<typename exa<Unit>::Type, 1000> Type; };
 template<typename Unit> struct yotta { typedef ScaledUnit<typename zetta<Unit>::Type, 1000> Type; };
 
-template<typename Unit> struct deci  { typedef ScaledUnit<Unit, 1, 10> Type; };
+template<typename Unit> struct deci { typedef ScaledUnit<Unit, 1, 10> Type; };
 template<typename Unit> struct centi { typedef ScaledUnit<Unit, 1, 100> Type; };
 template<typename Unit> struct milli { typedef ScaledUnit<Unit, 1, 1000> Type; };
 template<typename Unit> struct micro { typedef ScaledUnit<typename milli<Unit>::Type, 1, 1000> Type; };
-template<typename Unit> struct nano  { typedef ScaledUnit<typename micro<Unit>::Type, 1, 1000> Type; };
-template<typename Unit> struct pico  { typedef ScaledUnit<typename nano<Unit>::Type, 1, 1000> Type; };
+template<typename Unit> struct nano { typedef ScaledUnit<typename micro<Unit>::Type, 1, 1000> Type; };
+template<typename Unit> struct pico { typedef ScaledUnit<typename nano<Unit>::Type, 1, 1000> Type; };
 template<typename Unit> struct femto { typedef ScaledUnit<typename pico<Unit>::Type, 1, 1000> Type; };
-template<typename Unit> struct atto  { typedef ScaledUnit<typename femto<Unit>::Type, 1, 1000> Type; };
+template<typename Unit> struct atto { typedef ScaledUnit<typename femto<Unit>::Type, 1, 1000> Type; };
 template<typename Unit> struct zepto { typedef ScaledUnit<typename atto<Unit>::Type, 1, 1000> Type; };
 template<typename Unit> struct yocto { typedef ScaledUnit<typename zepto<Unit>::Type, 1, 1000> Type; };
 
@@ -2255,51 +2259,61 @@ UNIT_DISPLAY_NAME(candelaBase, "cd")
 ////////////////////////////////////////////
 // SI Unit - The one to use
 ////////////////////////////////////////////
-using Metre   = standard<metreBase>::Type;
-using Second  = standard<secondBase>::Type;
-using Mole    = standard<moleBase>::Type;
-using Kelvin  = standard<kelvinBase>::Type;
-using Gram    = standard<gBase>::Type;
-using Ampere  = standard<ampereBase>::Type;
+
+
+// Distance
+using Metre = standard<metreBase>::Type;
+// Time
+using Second = standard<secondBase>::Type;
+// Amount of substance
+using Mole = standard<moleBase>::Type;
+// Temperature
+using Kelvin = standard<kelvinBase>::Type;
+// Mass
+using Gram = standard<gBase>::Type;
+// Electric current
+using Ampere = standard<ampereBase>::Type;
+// Luminous intensity
 using Candela = standard<candelaBase>::Type;
 
 ////////////////////////////////////////////
 // Scaled SI Unit
 ////////////////////////////////////////////
 // Length units
-using Kilometre  = kilo<Metre>::Type;
-using Decimetre  = deci<Metre>::Type;
+using Kilometre = kilo<Metre>::Type;
+using Decimetre = deci<Metre>::Type;
 using Centimetre = centi<Metre>::Type;
 using Millimetre = milli<Metre>::Type;
 using Micrometre = micro<Metre>::Type;
-using Nanometre  = nano<Metre>::Type;
-using Picometre  = pico<Metre>::Type;
+using Nanometre = nano<Metre>::Type;
+using Picometre = pico<Metre>::Type;
 
 // Mass units
-using Kilogram  = kilo<Gram>::Type;
+using Kilogram = kilo<Gram>::Type;
 using Centigram = centi<Gram>::Type;
 using Milligram = milli<Gram>::Type;
 
 // Time units
-using Attosecond  = atto<Second>::Type;
+using Attosecond = atto<Second>::Type;
 using Femtosecond = femto<Second>::Type;
-using Picosecond  = pico<Second>::Type;
+using Picosecond = pico<Second>::Type;
+using Nanosecond = nano<Second>::Type;
 using Microsecond = micro<Second>::Type;
 using Millisecond = milli<Second>::Type;
 using Minute = ScaledUnit<Second, 60, 1>;
-using Hour   = ScaledUnit<Minute, 60, 1>;
-using Day    = ScaledUnit<Hour, 24, 1>;
+using Hour = ScaledUnit<Minute, 60, 1>;
+using Day = ScaledUnit<Hour, 24, 1>;
 
 // Electric current
-using Kiloampere  = kilo<Ampere>::Type;
+using Kiloampere = kilo<Ampere>::Type;
 using Milliampere = milli<Ampere>::Type;
 
 // Temperature
-using Kilokelvin  = kilo<Kelvin>::Type;
+using Kilokelvin = kilo<Kelvin>::Type;
 using Millikelvin = milli<Kelvin>::Type;
 
 // Amount of substance
-using Kilomole  = kilo<Mole>::Type;
+using Kilomole = kilo<Mole>::Type;
 using Millimole = milli<Mole>::Type;
 
 // Luminous intensity
@@ -2388,12 +2402,12 @@ using Newton = Multiply<Kilogram, Metre, SecondM2>::Type;   // Force
 using Pascal = Multiply<Kilogram, MetreM1, SecondM2>::Type; // Pressure, stress
 
 using Joule = Multiply<Kilogram, Metre2, SecondM2>::Type;   // Energy, work, heat
-using Watt  = Multiply<Kilogram, Metre2, SecondM3>::Type;   // Power, radiant flux
+using Watt = Multiply<Kilogram, Metre2, SecondM3>::Type;   // Power, radiant flux
 
 using Coulomb = Multiply<Ampere, Second>::Type;                                                    // Electric charge or quantity of electricity
-using Volt    = Divide<Multiply<Kilogram, Metre2>::Type, Multiply<Second3, Ampere>::Type>::Type;   // Voltage (Electrical potential difference), Electromotive force (Joule/Coulomb)
-using Farad   = Divide<Multiply<Ampere2, Second4>::Type, Multiply<Kilogram, Metre2>::Type>::Type;  // Electric capacitance (Coulomb/Volt)
-using Ohm     = Divide<Multiply<Kilogram, Metre2>::Type, Multiply<Second3, Ampere2>::Type>::Type;  // Electric resistance, impedance, reactance (Volt/Ampere)
+using Volt = Divide<Multiply<Kilogram, Metre2>::Type, Multiply<Second3, Ampere>::Type>::Type;   // Voltage (Electrical potential difference), Electromotive force (Joule/Coulomb)
+using Farad = Divide<Multiply<Ampere2, Second4>::Type, Multiply<Kilogram, Metre2>::Type>::Type;  // Electric capacitance (Coulomb/Volt)
+using Ohm = Divide<Multiply<Kilogram, Metre2>::Type, Multiply<Second3, Ampere2>::Type>::Type;  // Electric resistance, impedance, reactance (Volt/Ampere)
 using Siemens = Divide<Multiply<Ampere2, Second3>::Type, Multiply<Kilogram, Metre2>::Type>::Type;  // Electrical conductance (Ampere/Volt)
 
 using Weber = Divide<Kilogram, Multiply<Metre2, Second2, Ampere>::Type>::Type;                    // Magnetic flux
@@ -2401,11 +2415,11 @@ using Tesla = Divide<Kilogram, Multiply<Second2, Ampere>::Type>::Type;          
 using Henry = Divide<Multiply<Kilogram, Metre2>::Type, Multiply<Second2, Ampere2>::Type>::Type;   // Inductance
 
 using Lumen = Candela;                         // Luminous flux
-using Lux   = Divide<Candela, Metre2>::Type;   // Illuminance
+using Lux = Divide<Candela, Metre2>::Type;   // Illuminance
 
 using Becquerel = SecondM1;                      // Radioactivity
-using Gray      = Divide<Metre2, Second2>::Type; // Absorbed dose (of ionizing radiation)
-using Sievert   = Divide<Metre2, Second2>::Type; // Equivalent dose (of ionizing radiation)
+using Gray = Divide<Metre2, Second2>::Type; // Absorbed dose (of ionizing radiation)
+using Sievert = Divide<Metre2, Second2>::Type; // Equivalent dose (of ionizing radiation)
 
 using Katal = Divide<Mole, Second>::Type;      // Catalytic Activity
 using Hertz = SecondM1;                        // Frequency
@@ -2435,12 +2449,12 @@ UNIT_DISPLAY_NAME(Katal, "kat")
 ////////////////////////////////////////////
 // Other Composed Unit
 ////////////////////////////////////////////
-using Speed        = Divide<Metre, Second>::Type;
+using Speed = Divide<Metre, Second>::Type;
 using Acceleration = Divide<Metre, Second2>::Type;
-using Momentum     = Divide<Multiply<Kilogram, Metre>::Type, Second>::Type;
-using Density      = Divide<Kilogram, Metre3>::Type;
+using Momentum = Divide<Multiply<Kilogram, Metre>::Type, Second>::Type;
+using Density = Divide<Kilogram, Metre3>::Type;
 
-using Angstrom     = ScaledUnit<Metre, 1, 10000000000>;
+using Angstrom = ScaledUnit<Metre, 1, 10000000000>;
 
 
 ////////////////////////////////////////////
