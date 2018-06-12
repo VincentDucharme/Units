@@ -23,40 +23,14 @@ SOFTWARE.
 #ifndef _UNIT_H_
 #define _UNIT_H_
 
+#include <cmath>
 #include <cstdint>
 #include <type_traits>
 
-using int64 = std::int64_t;
-using int32 = std::int32_t;
+using int64  = std::int64_t;
+using int32  = std::int32_t;
 using uint64 = std::uint64_t;
 using uint32 = std::uint32_t;
-
-////////////////////////////////////////////
-// Forward declaration
-////////////////////////////////////////////
-
-// Create unit in the form of U^(N/D)
-template<typename U, int32 N, int32 D, typename UBase>
-class PoweredUnit;
-
-// Create unit in the form of U*(N/D)
-template<typename U, int64 N, int64 D, typename UBase>
-class ScaledUnit;
-
-// Create unit in the form of UV
-template<typename U, typename V>
-class ComposedUnit;
-
-// Create a vector with component of type U
-template<typename U>
-class Vector;
-
-// Base class for Unit
-template<typename U>
-class Unit;
-
-// Wrapper of double for unitless data
-class Scalar;
 
 ////////////////////////////////////////////
 // Internal utilities
@@ -163,6 +137,34 @@ namespace internals
 
 
 ////////////////////////////////////////////
+// Forward declaration
+////////////////////////////////////////////
+
+// Create unit in the form of U^(N/D)
+template<typename U, int32 N, int32 D, typename UBase>
+class PoweredUnit;
+
+// Create unit in the form of U*(N/D)
+template<typename U, int64 N, int64 D, typename UBase>
+class ScaledUnit;
+
+// Create unit in the form of UV
+template<typename U, typename V>
+class ComposedUnit;
+
+// Create a vector with component of type U
+template<typename U>
+class Vector;
+
+// Base class for Unit
+template<typename U>
+class Unit;
+
+// Wrapper of double for unitless data
+class Scalar;
+
+
+////////////////////////////////////////////
 // Scalar - Wrapper to a double
 ////////////////////////////////////////////
 class Scalar final
@@ -180,56 +182,56 @@ public:
     {
     }
 
-    Scalar& operator+=(const Scalar& u)
+    constexpr Scalar& operator+=(const Scalar& u)
     {
         m_value += u.m_value;
         return *this;
     }
 
-    Scalar& operator-=(const Scalar& u)
+    constexpr Scalar& operator-=(const Scalar& u)
     {
         m_value -= u.m_value;
         return *this;
     }
 
-    Scalar& operator*=(Scalar u)
+    constexpr Scalar& operator*=(Scalar u)
     {
         m_value *= u.m_value;
         return *this;
     }
 
     template<typename F>
-    typename ::internals::EnableIf< ::internals::IsArithmetic<F>::Result, Scalar&>::EnableType operator*=(const F& u)
+    constexpr typename ::internals::EnableIf< ::internals::IsArithmetic<F>::Result, Scalar&>::EnableType operator*=(const F& u)
     {
         m_value *= u;
         return *this;
     }
 
-    Scalar& operator/=(Scalar u)
+    constexpr Scalar& operator/=(Scalar u)
     {
         m_value /= u.m_value;
         return *this;
     }
 
     template<typename F>
-    typename ::internals::EnableIf< ::internals::IsArithmetic<F>::Result, Scalar&>::EnableType operator/=(const F& u)
+    constexpr typename ::internals::EnableIf< ::internals::IsArithmetic<F>::Result, Scalar&>::EnableType operator/=(const F& u)
     {
         m_value /= u;
         return *this;
     }
 
-    operator double() const
+    constexpr operator double() const
     {
         return m_value;
     }
 
-    double Value() const
+    constexpr double Value() const
     {
         return m_value;
     }
 
     template<typename U>
-    U ToUnit() const
+    constexpr U ToUnit() const
     {
         return U(m_value);
     }
@@ -263,25 +265,13 @@ public:
     }
 
     constexpr Unit(const Unit&) = default;
-    constexpr Unit(Unit&&) = default;
 
     ///////////////////////////
     // Assignation operators
     ///////////////////////////
-    U& operator=(const Unit<U>& u)
+    constexpr U& operator=(const Unit<U>& u)
     {
         m_value = u.Value();
-
-        return static_cast<U&>(*this);
-    }
-
-    U& operator=(Unit<U>&& u)
-    {
-        if (this != &u)
-        {
-            m_value = u.m_value;
-            u.m_value = 0;
-        }
 
         return static_cast<U&>(*this);
     }
@@ -289,7 +279,7 @@ public:
     ///////////////////////////
     // Negation operators
     ///////////////////////////
-    U operator-() const
+    constexpr U operator-() const
     {
         return U(-m_value);
     }
@@ -297,27 +287,27 @@ public:
     ///////////////////////////
     // Auto in(de)crement operators
     ///////////////////////////
-    U operator++(int)
+    constexpr U operator++(int)
     {
         U temp(m_value);
         ++m_value;
         return temp;
     }
 
-    U& operator++()
+    constexpr U& operator++()
     {
         ++m_value;
         return static_cast<U&>(*this);
     }
 
-    U operator--(int)
+    constexpr U operator--(int)
     {
         U temp(m_value);
         --m_value;
         return temp;
     }
 
-    U& operator--()
+    constexpr U& operator--()
     {
         --m_value;
         return static_cast<U&>(*this);
@@ -326,12 +316,12 @@ public:
     ///////////////////////////
     // Add/Sub operators
     ///////////////////////////
-    U operator-(const U& u) const
+    constexpr U operator-(const U& u) const
     {
         return U(m_value - u.m_value);
     }
 
-    U operator+(const U& u) const
+    constexpr U operator+(const U& u) const
     {
         return U(m_value + u.m_value);
     }
@@ -340,14 +330,14 @@ public:
     // Multiplication operators
     ///////////////////////////
     // Multiply by Scalar -> Unit
-    U operator*(Scalar u) const
+    constexpr U operator*(Scalar u) const
     {
         return U(m_value * u.Value());
     }
 
     // Multiply by an arithmetic value -> Unit
     template<typename F>
-    typename ::internals::EnableIf< ::internals::IsArithmetic<F>::Result, U>::EnableType operator*(const F& u) const
+    constexpr typename ::internals::EnableIf< ::internals::IsArithmetic<F>::Result, U>::EnableType operator*(const F& u) const
     {
         return U(m_value * u);
     }
@@ -356,20 +346,20 @@ public:
     // Division operators
     ///////////////////////////
     // Divide by same type -> Scalar
-    Scalar operator/(const U& u) const
+    constexpr Scalar operator/(const U& u) const
     {
         return Scalar(m_value / u.m_value);
     }
 
     // Divide by Scalar -> Unit
-    U operator/(Scalar u) const
+    constexpr U operator/(Scalar u) const
     {
         return U(m_value / u.Value());
     }
 
     // Divide by an arithmetic value -> Unit
     template<typename F>
-    typename ::internals::EnableIf< ::internals::IsArithmetic<F>::Result, U>::EnableType operator/(const F& u) const
+    constexpr typename ::internals::EnableIf< ::internals::IsArithmetic<F>::Result, U>::EnableType operator/(const F& u) const
     {
         return U(m_value / u);
     }
@@ -377,13 +367,13 @@ public:
     ///////////////////////////
     // Add/Sub equal operator
     ///////////////////////////
-    U& operator+=(const U& u)
+    constexpr U& operator+=(const U& u)
     {
         m_value += u.m_value;
         return static_cast<U&>(*this);
     }
 
-    U& operator-=(const U& u)
+    constexpr U& operator-=(const U& u)
     {
         m_value -= u.m_value;
         return static_cast<U&>(*this);
@@ -392,14 +382,14 @@ public:
     ///////////////////////////
     // Multiply equal operator
     ///////////////////////////
-    U& operator*=(Scalar u)
+    constexpr U& operator*=(Scalar u)
     {
         m_value *= u.Value();
         return static_cast<U&>(*this);
     }
 
     template<typename F>
-    typename ::internals::EnableIf< ::internals::IsArithmetic<F>::Result, U&>::EnableType operator*=(const F& u)
+    constexpr typename ::internals::EnableIf< ::internals::IsArithmetic<F>::Result, U&>::EnableType operator*=(const F& u)
     {
         m_value *= u;
         return static_cast<U&>(*this);
@@ -408,14 +398,14 @@ public:
     ///////////////////////////
     // Divide equal operator
     ///////////////////////////
-    U& operator/=(Scalar u)
+    constexpr U& operator/=(Scalar u)
     {
         m_value /= u.Value();
         return static_cast<U&>(*this);
     }
 
     template<typename F>
-    typename ::internals::EnableIf< ::internals::IsArithmetic<F>::Result, U&>::EnableType operator/=(const F& u)
+    constexpr typename ::internals::EnableIf< ::internals::IsArithmetic<F>::Result, U&>::EnableType operator/=(const F& u)
     {
         m_value /= u;
         return static_cast<U&>(*this);
@@ -424,32 +414,32 @@ public:
     ///////////////////////////
     // Logical operators
     ///////////////////////////
-    bool operator==(const U& u) const
+    constexpr bool operator==(const U& u) const
     {
         return m_value == u.m_value;
     }
 
-    bool operator!=(const U& u) const
+    constexpr bool operator!=(const U& u) const
     {
         return !(*this == u);
     }
 
-    bool operator<(const U& u) const
+    constexpr bool operator<(const U& u) const
     {
         return m_value < u.m_value;
     }
 
-    bool operator>(const U& u) const
+    constexpr bool operator>(const U& u) const
     {
         return m_value > u.m_value;
     }
 
-    bool operator<=(const U& u) const
+    constexpr bool operator<=(const U& u) const
     {
         return !(*this > u);
     }
 
-    bool operator>=(const U& u) const
+    constexpr bool operator>=(const U& u) const
     {
         return !(*this < u);
     }
@@ -457,10 +447,15 @@ public:
     ///////////////////////////
     // Other functions
     ///////////////////////////
-    double Value() const { return m_value; }
+    constexpr double Value() const { return m_value; }
+
+    constexpr explicit operator double() const
+    {
+        return m_value;
+    }
 
     template<typename V>
-    V ToUnit() const { return V(m_value); }
+    constexpr V ToUnit() const { return V(m_value); }
 
     template<typename S>
     friend S& operator >> (S& is, Unit<U>& u)
@@ -475,14 +470,14 @@ protected:
 
 // Scalar multiply unit
 template<typename U>
-U operator*(const Scalar d, const Unit<U>& u)
+constexpr U operator*(const Scalar d, const Unit<U>& u)
 {
     return u * d;
 }
 
 // Arithmetic value multiply unit
 template<typename F, typename U>
-typename ::internals::EnableIf< ::internals::IsArithmetic<F>::Result, U>::EnableType operator*(const F& f, const Unit<U>& u)
+constexpr typename ::internals::EnableIf< ::internals::IsArithmetic<F>::Result, U>::EnableType operator*(const F& f, const Unit<U>& u)
 {
     return u * f;
 }
@@ -650,7 +645,7 @@ namespace internals
     template<int64 SNTarget, int64 SDTarget, int64 SNFrom, int64 SDFrom, int32 PN, int32 PD>
     struct GetChangeFactorBase
     {
-        constexpr static double GetFactor() { return pow(GetScaleChange<SNFrom, SDFrom, SNTarget, SDTarget>::Get(), (PN / static_cast<double>(PD))); }
+        constexpr static double GetFactor() { return std::pow(GetScaleChange<SNFrom, SDFrom, SNTarget, SDTarget>::Get(), (PN / static_cast<double>(PD))); }
     };
 
     // Particular case when Power of 1, do not make the pow function for nothing
@@ -1072,17 +1067,6 @@ namespace internals
     template<typename U, int64 Num, int64 Den>
     struct outputUnitScaledBase;
 
-    // General case for ScaledUnit
-    template<typename U, int64 SN, int64 SD, typename UBase>
-    struct outputUnit< ::ScaledUnit<U, SN, SD, UBase> >
-    {
-        template<typename S>
-        static void Output(S& os)
-        {
-            outputUnitScaledBase<typename GetBaseUnit<U>::BaseUnit, GetScale< ::ScaledUnit<U, SN, SD, UBase> >::Num, GetScale< ::ScaledUnit<U, SN, SD, UBase> >::Den>::Output(os);
-        }
-    };
-
     // Particular cases for ScaledUnit
     template<typename U, int64 Num, int64 Den>
     struct outputUnitScaledBase
@@ -1098,6 +1082,7 @@ namespace internals
         }
     };
 
+    // TODO : Check to transform these traits for autogenerated with macro when defining ScaleFactor later?
     template<typename U>
     struct outputUnitScaledBase<U, 1, 1>
     {
@@ -1196,6 +1181,17 @@ namespace internals
         }
     };
 
+    // General case for ScaledUnit
+    template<typename U, int64 SN, int64 SD, typename UBase>
+    struct outputUnit< ::ScaledUnit<U, SN, SD, UBase> >
+    {
+        template<typename S>
+        static void Output(S& os)
+        {
+            outputUnitScaledBase<typename GetBaseUnit<U>::BaseUnit, GetScale< ::ScaledUnit<U, SN, SD, UBase> >::Num, GetScale< ::ScaledUnit<U, SN, SD, UBase> >::Den>::Output(os);
+        }
+    };
+
     // General case for PoweredUnit
     template<typename U, int32 PN, int32 PD, typename UBase>
     struct outputUnit< ::PoweredUnit<U, PN, PD, UBase> >
@@ -1274,33 +1270,33 @@ public:
     ///////////////////////////
 
     // From a double value
-    explicit ScaledUnit(const double& val = 0.0)
+    constexpr explicit ScaledUnit(const double& val = 0.0)
         : Unit<ScaledUnit<U, N, D, UBase> >(val)
     {
     }
 
     // From a ScaledUnit with the same baseUnit, different scale -> Scale it!
     template<typename V, int64 SN, int64 SD>
-    ScaledUnit(const ScaledUnit<V, SN, SD, UBase>& u)
+    constexpr ScaledUnit(const ScaledUnit<V, SN, SD, UBase>& u)
         : Unit<ScaledUnit<U, N, D, UBase> >(::internals::ChangeFactor<ScaledUnit<U, N, D, UBase>, ScaledUnit<V, SN, SD, UBase> >::GetValue(u.Value()))
     {
     }
 
     // From a PoweredUnit (1/1) of a ScaledUnit same as this one -> Just the scale unit
-    ScaledUnit(const PoweredUnit<ScaledUnit<U, N, D, UBase>, 1, 1, UBase>& u)
+    constexpr ScaledUnit(const PoweredUnit<ScaledUnit<U, N, D, UBase>, 1, 1, UBase>& u)
         : Unit<ScaledUnit<U, N, D, UBase> >(u.Value())
     {
     }
 
     // From a PoweredUnit (1/1) of a ScaledUnit with the same baseUnit, but not the same scale -> Scale it!
     template<typename V, int64 SN, int64 SD>
-    ScaledUnit(const PoweredUnit<ScaledUnit<V, SN, SD, UBase>, 1, 1, UBase>& u)
+    constexpr ScaledUnit(const PoweredUnit<ScaledUnit<V, SN, SD, UBase>, 1, 1, UBase>& u)
         : Unit<ScaledUnit<U, N, D, UBase> >(::internals::ChangeFactor<ScaledUnit<U, N, D, UBase>, ScaledUnit<V, SN, SD, UBase> >::GetValue(u.Value()))
     {
     }
 
     template<typename V1, typename V2>
-    ScaledUnit(const ComposedUnit<V1, V2>& u, typename ::internals::EnableIf< ::internals::IsSameTypes<UBase, ComposedUnit<V1, V2> >::Result>::EnableType* dummy = 0)
+    constexpr ScaledUnit(const ComposedUnit<V1, V2>& u, typename ::internals::EnableIf< ::internals::IsSameTypes<UBase, ComposedUnit<V1, V2> >::Result>::EnableType* dummy = 0)
         : Unit<ScaledUnit<U, N, D, UBase> >(::internals::ChangeFactor<ScaledUnit<U, N, D, UBase>, ComposedUnit<V1, V2> >::GetValue(u.Value()))
     {
     }
@@ -1310,7 +1306,7 @@ public:
     // Assignation operators
     ///////////////////////////
     // Assignation from the same Scaled Unit
-    ScaledUnit<U, N, D, UBase>& operator=(const ScaledUnit<U, N, D, UBase>& u)
+    constexpr ScaledUnit<U, N, D, UBase>& operator=(const ScaledUnit<U, N, D, UBase>& u)
     {
         if (this == &u)
             return *this;
@@ -1322,7 +1318,7 @@ public:
 
     // Assignation from a ScaledUnit with the same baseUnit, but not the same scale -> Scale it!
     template<typename V, int64 SN, int64 SD>
-    ScaledUnit<U, N, D, UBase>& operator=(const ScaledUnit<V, SN, SD, UBase>& u)
+    constexpr ScaledUnit<U, N, D, UBase>& operator=(const ScaledUnit<V, SN, SD, UBase>& u)
     {
         using ChangeFactorType = ::internals::ChangeFactor<ScaledUnit<U, N, D, UBase>, ScaledUnit<V, SN, SD, UBase> >;
 
@@ -1331,7 +1327,7 @@ public:
     }
 
     template<typename U1, typename U2>
-    typename ::internals::EnableIf< ::internals::IsSameTypes<UBase, ComposedUnit<U1, U2> >::Result, ScaledUnit<U, N, D, UBase> >::EnableType& operator=(const ComposedUnit<U1, U2>& u)
+    constexpr typename ::internals::EnableIf< ::internals::IsSameTypes<UBase, ComposedUnit<U1, U2> >::Result, ScaledUnit<U, N, D, UBase> >::EnableType& operator=(const ComposedUnit<U1, U2>& u)
     {
         using ChangeFactorType = ::internals::ChangeFactor<ScaledUnit<U, N, D, UBase>, ComposedUnit<U1, U2> >;
 
@@ -1346,7 +1342,7 @@ public:
     using Unit<ScaledUnit<U, N, D, UBase> >::operator*;
 
     // Multiply by self -> PoweredUnit
-    typename OperatorResultType<ScaledUnit<U, N, D, UBase> >::MultiplyType operator*(const ScaledUnit<U, N, D, UBase>& u) const
+    constexpr typename OperatorResultType<ScaledUnit<U, N, D, UBase> >::MultiplyType operator*(const ScaledUnit<U, N, D, UBase>& u) const
     {
         using ReturnType = typename OperatorResultType<ScaledUnit<U, N, D, UBase> >::MultiplyType;
         return ReturnType(Unit<ScaledUnit<U, N, D, UBase> >::Value() * u.Value());
@@ -1354,7 +1350,7 @@ public:
 
     // Multiply by same baseUnit, Scaled -> PoweredUnit
     template<typename V, int64 SN, int64 SD>
-    typename OperatorResultType<ScaledUnit<V, SN, SD, UBase> >::MultiplyType operator*(const ScaledUnit<V, SN, SD, UBase>& u) const
+    constexpr typename OperatorResultType<ScaledUnit<V, SN, SD, UBase> >::MultiplyType operator*(const ScaledUnit<V, SN, SD, UBase>& u) const
     {
         using ChangeFactorType = ::internals::ChangeFactor<ScaledUnit<U, N, D, UBase>, ScaledUnit<V, SN, SD, UBase> >;
         using ReturnType = typename OperatorResultType<ScaledUnit<V, SN, SD, UBase> >::MultiplyType;
@@ -1364,7 +1360,7 @@ public:
 
     // Multiply by PoweredUnit, same baseUnit, same Scaled -> PoweredUnit'
     template<int32 PN, int32 PD>
-    typename OperatorResultType<PoweredUnit<ScaledUnit<U, N, D, UBase>, PN, PD, UBase> >::MultiplyType operator*(const PoweredUnit<ScaledUnit<U, N, D, UBase>, PN, PD, UBase>& u) const
+    constexpr typename OperatorResultType<PoweredUnit<ScaledUnit<U, N, D, UBase>, PN, PD, UBase> >::MultiplyType operator*(const PoweredUnit<ScaledUnit<U, N, D, UBase>, PN, PD, UBase>& u) const
     {
         using ReturnType = typename OperatorResultType<PoweredUnit<ScaledUnit<U, N, D, UBase>, PN, PD, UBase> >::MultiplyType;
 
@@ -1373,7 +1369,7 @@ public:
 
     // Multiply by PoweredUnit, same baseUnit, different Scaled -> PoweredUnit'
     template<typename V, int64 SN, int64 SD, int32 PN, int32 PD>
-    typename OperatorResultType<PoweredUnit<ScaledUnit<V, SN, SD, UBase>, PN, PD, UBase> >::MultiplyType operator*(const PoweredUnit<ScaledUnit<V, SN, SD, UBase>, PN, PD, UBase>& u) const
+    constexpr typename OperatorResultType<PoweredUnit<ScaledUnit<V, SN, SD, UBase>, PN, PD, UBase> >::MultiplyType operator*(const PoweredUnit<ScaledUnit<V, SN, SD, UBase>, PN, PD, UBase>& u) const
     {
         using ChangeFactorType = ::internals::ChangeFactor<ScaledUnit<U, N, D, UBase>, PoweredUnit<ScaledUnit<V, SN, SD, UBase>, PN, PD, UBase> >;
         using ReturnType = typename OperatorResultType<PoweredUnit<ScaledUnit<V, SN, SD, UBase>, PN, PD, UBase> >::MultiplyType;
@@ -1383,7 +1379,7 @@ public:
 
     // Multiply by ScaledUnit, different baseUnit -> ComposedUnit
     template<typename V, int64 N2, int64 D2, typename UBase2>
-    typename ::internals::TransformUnit<ScaledUnit<U, N, D, UBase>, ScaledUnit<V, N2, D2, UBase2> >::MultiplyType operator*(const ScaledUnit<V, N2, D2, UBase2>& u) const
+    constexpr typename ::internals::TransformUnit<ScaledUnit<U, N, D, UBase>, ScaledUnit<V, N2, D2, UBase2> >::MultiplyType operator*(const ScaledUnit<V, N2, D2, UBase2>& u) const
     {
         using ReturnType = ::internals::TransformUnit<ScaledUnit<U, N, D, UBase>, ScaledUnit<V, N2, D2, UBase2> >;
 
@@ -1392,7 +1388,7 @@ public:
 
     // Multiply by PoweredUnit, different unit -> ComposedUnit
     template<typename V, int32 N2, int32 D2, typename UBase2>
-    typename ::internals::TransformUnit<ScaledUnit<U, N, D, UBase>, PoweredUnit<V, N2, D2, UBase2> >::MultiplyType operator*(const PoweredUnit<V, N2, D2, UBase2>& u) const
+    constexpr typename ::internals::TransformUnit<ScaledUnit<U, N, D, UBase>, PoweredUnit<V, N2, D2, UBase2> >::MultiplyType operator*(const PoweredUnit<V, N2, D2, UBase2>& u) const
     {
         using ReturnType = ::internals::TransformUnit<ScaledUnit<U, N, D, UBase>, PoweredUnit<V, N2, D2, UBase2> >;
 
@@ -1401,7 +1397,7 @@ public:
 
     // Multiply by ComposedUnit
     template<typename U1, typename U2>
-    typename ::internals::TransformUnit<ComposedUnit<U1, U2>, ScaledUnit<U, N, D, UBase> >::MultiplyType operator*(const ComposedUnit<U1, U2>& u) const
+    constexpr typename ::internals::TransformUnit<ComposedUnit<U1, U2>, ScaledUnit<U, N, D, UBase> >::MultiplyType operator*(const ComposedUnit<U1, U2>& u) const
     {
         using ReturnType = ::internals::TransformUnit<ComposedUnit<U1, U2>, ScaledUnit<U, N, D, UBase> >;
 
@@ -1417,7 +1413,7 @@ public:
 
     // Divide by ScaledUnit, same baseUnit, different scale -> double
     template<typename V, int64 SN, int64 SD>
-    typename OperatorResultType<ScaledUnit<V, SN, SD, UBase> >::DivideType operator/(const ScaledUnit<V, SN, SD, UBase>& u) const
+    constexpr typename OperatorResultType<ScaledUnit<V, SN, SD, UBase> >::DivideType operator/(const ScaledUnit<V, SN, SD, UBase>& u) const
     {
         using ChangeFactorType = ::internals::ChangeFactor<ScaledUnit<U, N, D, UBase>, ScaledUnit<V, SN, SD, UBase> >;
         using ReturnType = typename OperatorResultType<ScaledUnit<V, SN, SD, UBase> >::DivideType;
@@ -1427,7 +1423,7 @@ public:
 
     // Divide by PoweredUnit, same baseUnit, different scale -> Powered ScaledUnit
     template<typename V, int32 PN, int32 PD>
-    typename OperatorResultType<PoweredUnit<V, PN, PD, UBase> >::DivideType operator/(const PoweredUnit<V, PN, PD, UBase>& u) const
+    constexpr typename OperatorResultType<PoweredUnit<V, PN, PD, UBase> >::DivideType operator/(const PoweredUnit<V, PN, PD, UBase>& u) const
     {
         using ChangeFactorType = ::internals::ChangeFactor<ScaledUnit<U, N, D, UBase>, PoweredUnit<V, PN, PD, UBase> >;
         using ReturnType = typename OperatorResultType<PoweredUnit<V, PN, PD, UBase> >::DivideType;
@@ -1437,7 +1433,7 @@ public:
 
     // Divide by PoweredUnit, same baseUnit, same scale -> Powered ScaledUnit
     template<int32 PN, int32 PD>
-    typename OperatorResultType<PoweredUnit<ScaledUnit<U, N, D, UBase>, PN, PD, UBase> >::DivideType operator/(const PoweredUnit<ScaledUnit<U, N, D, UBase>, PN, PD, UBase>& u) const
+    constexpr typename OperatorResultType<PoweredUnit<ScaledUnit<U, N, D, UBase>, PN, PD, UBase> >::DivideType operator/(const PoweredUnit<ScaledUnit<U, N, D, UBase>, PN, PD, UBase>& u) const
     {
         using ReturnType = typename OperatorResultType<PoweredUnit<ScaledUnit<U, N, D, UBase>, PN, PD, UBase> >::DivideType;
 
@@ -1446,7 +1442,7 @@ public:
 
     // Divide by ScaledUnit, different baseUnit -> ComposedUnit and Powered -1 for other ScaledUnit
     template<typename V, int64 SN, int64 SD, typename UBase2>
-    typename ::internals::TransformUnit<ScaledUnit<U, N, D, UBase>, ScaledUnit<V, SN, SD, UBase2> >::DivideType operator/(const ScaledUnit<V, SN, SD, UBase2>& u) const
+    constexpr typename ::internals::TransformUnit<ScaledUnit<U, N, D, UBase>, ScaledUnit<V, SN, SD, UBase2> >::DivideType operator/(const ScaledUnit<V, SN, SD, UBase2>& u) const
     {
         using ReturnType = ::internals::TransformUnit<ScaledUnit<U, N, D, UBase>, ScaledUnit<V, SN, SD, UBase2> >;
 
@@ -1455,7 +1451,7 @@ public:
 
     // Divide by ScaledUnit, different baseUnit -> ComposedUnit and Powered -1 for other ScaledUnit
     template<typename V, int32 PN, int32 PD, typename UBase2>
-    typename ::internals::TransformUnit<ScaledUnit<U, N, D, UBase>, PoweredUnit<V, PN, PD, UBase2> >::DivideType operator/(const PoweredUnit<V, PN, PD, UBase2>& u) const
+    constexpr typename ::internals::TransformUnit<ScaledUnit<U, N, D, UBase>, PoweredUnit<V, PN, PD, UBase2> >::DivideType operator/(const PoweredUnit<V, PN, PD, UBase2>& u) const
     {
         using ReturnType = ::internals::TransformUnit<ScaledUnit<U, N, D, UBase>, PoweredUnit<V, PN, PD, UBase2> >;
 
@@ -1464,7 +1460,7 @@ public:
 
     // Divide by a ComposedUnit -> ComposedUnit
     template<typename U1, typename U2>
-    typename ::internals::TransformUnit<ScaledUnit<U, N, D, UBase>, ComposedUnit<U1, U2> >::DivideType operator/(const ComposedUnit<U1, U2>& u) const
+    constexpr typename ::internals::TransformUnit<ScaledUnit<U, N, D, UBase>, ComposedUnit<U1, U2> >::DivideType operator/(const ComposedUnit<U1, U2>& u) const
     {
         using ReturnType = ::internals::TransformUnit<ScaledUnit<U, N, D, UBase>, ComposedUnit<U1, U2> >;
 
@@ -1513,18 +1509,18 @@ public:
     ///////////////////////////
     // Constructors
     ///////////////////////////
-    explicit PoweredUnit(const double& val = 0.0)
+    constexpr explicit PoweredUnit(const double& val = 0.0)
         : Unit<PoweredUnit<U, N, D, UBase> >(val)
     {
     }
 
-    PoweredUnit(const PoweredUnit<U, N, D, UBase>& u)
+    constexpr PoweredUnit(const PoweredUnit<U, N, D, UBase>& u)
         : Unit<PoweredUnit<U, N, D, UBase> >(u.Value())
     {
     }
 
     template<typename V>
-    PoweredUnit(const PoweredUnit<V, N, D, UBase>& u)
+    constexpr PoweredUnit(const PoweredUnit<V, N, D, UBase>& u)
         : Unit<PoweredUnit<U, N, D, UBase> >(::internals::ChangeFactor< PoweredUnit<U, N, D, UBase>, PoweredUnit<V, N, D, UBase> >::GetValue(u.Value()))
     {
     }
@@ -1537,7 +1533,7 @@ public:
     using Unit<PoweredUnit<U, N, D, UBase> >::operator*;
 
     // Multiply by the inverse power -> double
-    typename OperatorResultType<PoweredUnit<U, -N, D, UBase> >::MultiplyType operator*(const PoweredUnit<U, -N, D, UBase>& u) const
+    constexpr typename OperatorResultType<PoweredUnit<U, -N, D, UBase> >::MultiplyType operator*(const PoweredUnit<U, -N, D, UBase>& u) const
     {
         using ReturnType = typename OperatorResultType<PoweredUnit<U, -N, D, UBase> >::MultiplyType;
 
@@ -1545,7 +1541,7 @@ public:
     }
 
     // Multiply by the unit itself (same scale, power = 1)
-    typename OperatorResultType<U>::MultiplyType operator*(const U& u) const
+    constexpr typename OperatorResultType<U>::MultiplyType operator*(const U& u) const
     {
         using ReturnType = typename OperatorResultType<U>::MultiplyType;
 
@@ -1554,7 +1550,7 @@ public:
 
     // Multiply by a ScaledUnit, with same baseUnit, different scale
     template<typename V, int64 SN, int64 SD>
-    typename OperatorResultType<ScaledUnit<V, SN, SD, UBase> >::MultiplyType operator*(const ScaledUnit<V, SN, SD, UBase>& u) const
+    constexpr typename OperatorResultType<ScaledUnit<V, SN, SD, UBase> >::MultiplyType operator*(const ScaledUnit<V, SN, SD, UBase>& u) const
     {
         using ChangeFactorType = ::internals::ChangeFactor<U, ScaledUnit<V, SN, SD, UBase> >;
         using ReturnType = typename OperatorResultType<ScaledUnit<V, SN, SD, UBase> >::MultiplyType;
@@ -1564,7 +1560,7 @@ public:
 
     // Multiply by another PoweredUnit, with the same baseUnit, but different scale and different power
     template<typename V, int PN2, int PD2>
-    typename OperatorResultType<PoweredUnit<V, PN2, PD2, UBase> >::MultiplyType operator*(const PoweredUnit<V, PN2, PD2, UBase>& u) const
+    constexpr typename OperatorResultType<PoweredUnit<V, PN2, PD2, UBase> >::MultiplyType operator*(const PoweredUnit<V, PN2, PD2, UBase>& u) const
     {
         using ChangeFactorType = ::internals::ChangeFactor<U, PoweredUnit<V, PN2, PD2, UBase> >;
         using ReturnType = typename OperatorResultType<PoweredUnit<V, PN2, PD2, UBase> >::MultiplyType;
@@ -1574,7 +1570,7 @@ public:
 
     // Multiply by Another PoweredUnit -> ComposedUnit
     template<typename V, int32 PN2, int32 PD2, typename UBase2>
-    typename ::internals::TransformUnit<PoweredUnit<U, N, D, UBase>, PoweredUnit<V, PN2, PD2, UBase2> >::MultiplyType operator*(const PoweredUnit<V, PN2, PD2, UBase2>& u) const
+    constexpr typename ::internals::TransformUnit<PoweredUnit<U, N, D, UBase>, PoweredUnit<V, PN2, PD2, UBase2> >::MultiplyType operator*(const PoweredUnit<V, PN2, PD2, UBase2>& u) const
     {
         using ReturnType = ::internals::TransformUnit<PoweredUnit<U, N, D, UBase>, PoweredUnit<V, PN2, PD2, UBase2> >;
 
@@ -1583,7 +1579,7 @@ public:
 
     // Multiply by Another ScaledUnit -> ComposedUnit
     template<typename V, int64 SN, int64 SD, typename UBase2>
-    typename ::internals::TransformUnit<PoweredUnit<U, N, D, UBase>, ScaledUnit<V, SN, SD, UBase2> >::MultiplyType operator*(const ScaledUnit<V, SN, SD, UBase2>& u) const
+    constexpr typename ::internals::TransformUnit<PoweredUnit<U, N, D, UBase>, ScaledUnit<V, SN, SD, UBase2> >::MultiplyType operator*(const ScaledUnit<V, SN, SD, UBase2>& u) const
     {
         using ReturnType = ::internals::TransformUnit<PoweredUnit<U, N, D, UBase>, ScaledUnit<V, SN, SD, UBase2> >;
 
@@ -1593,7 +1589,7 @@ public:
 
     // Multiply by Another PoweredUnit -> ComposedUnit
     template<typename U1, typename U2>
-    typename ::internals::TransformUnit<ComposedUnit<U1, U2>, PoweredUnit<U, N, D, UBase> >::MultiplyType operator*(const ComposedUnit<U1, U2>& u) const
+    constexpr typename ::internals::TransformUnit<ComposedUnit<U1, U2>, PoweredUnit<U, N, D, UBase> >::MultiplyType operator*(const ComposedUnit<U1, U2>& u) const
     {
         using ReturnType = ::internals::TransformUnit<ComposedUnit<U1, U2>, PoweredUnit<U, N, D, UBase> >;
 
@@ -1609,7 +1605,7 @@ public:
 
     // Divide by a transformed unit of the same power
     template<typename V>
-    typename OperatorResultType<PoweredUnit<V, N, D, UBase> >::DivideType operator/(const PoweredUnit<V, N, D, UBase>& u) const
+    constexpr typename OperatorResultType<PoweredUnit<V, N, D, UBase> >::DivideType operator/(const PoweredUnit<V, N, D, UBase>& u) const
     {
         using ChangeFactorType = ::internals::ChangeFactor<U, PoweredUnit<V, N, D, UBase> >;
         using ReturnType = typename OperatorResultType<PoweredUnit<V, N, D, UBase> >::DivideType;
@@ -1619,7 +1615,7 @@ public:
 
     // Divide by a different power of the same unit
     template<int32 N2, int32 D2>
-    typename OperatorResultType<PoweredUnit<U, N2, D2, UBase> >::DivideType operator/(const PoweredUnit<U, N2, D2, UBase>& u) const
+    constexpr typename OperatorResultType<PoweredUnit<U, N2, D2, UBase> >::DivideType operator/(const PoweredUnit<U, N2, D2, UBase>& u) const
     {
         using ReturnType = typename OperatorResultType<PoweredUnit<U, N2, D2, UBase> >::DivideType;
 
@@ -1628,7 +1624,7 @@ public:
 
     // Divide by a transformed unit of different power
     template<typename V, int32 N2, int32 D2>
-    typename OperatorResultType<PoweredUnit<V, N2, D2, UBase> >::DivideType operator/(const PoweredUnit<V, N2, D2, UBase>& u) const
+    constexpr typename OperatorResultType<PoweredUnit<V, N2, D2, UBase> >::DivideType operator/(const PoweredUnit<V, N2, D2, UBase>& u) const
     {
         using ChangeFactorType = ::internals::ChangeFactor<U, PoweredUnit<V, N2, D2, UBase> >;
         using ReturnType = typename OperatorResultType<PoweredUnit<V, N2, D2, UBase> >::DivideType;
@@ -1638,7 +1634,7 @@ public:
 
     // Divide by a ScaledUnit of the same baseUnit, different scale -> Scale it, and divide
     template<typename V, int64 N2, int64 D2>
-    typename OperatorResultType<ScaledUnit<V, N2, D2, UBase> >::DivideType operator/(const ScaledUnit<V, N2, D2, UBase>& u) const
+    constexpr typename OperatorResultType<ScaledUnit<V, N2, D2, UBase> >::DivideType operator/(const ScaledUnit<V, N2, D2, UBase>& u) const
     {
         using ChangeFactorType = ::internals::ChangeFactor<U, ScaledUnit<V, N2, D2, UBase> >;
         using ReturnType = typename OperatorResultType<ScaledUnit<V, N2, D2, UBase> >::DivideType;
@@ -1647,7 +1643,7 @@ public:
     }
 
     // Divide by a ScaledUnit of the same baseUnit -> Scale it, and divide
-    typename OperatorResultType<U>::DivideType operator/(const U& u) const
+    constexpr typename OperatorResultType<U>::DivideType operator/(const U& u) const
     {
         using ReturnType = typename OperatorResultType<U>::DivideType;
 
@@ -1656,7 +1652,7 @@ public:
 
     // Divide by a PoweredUnit of another baseUnit -> Compose it
     template<typename V, int32 N2, int32 D2, typename UBase2>
-    typename ::internals::TransformUnit<PoweredUnit<U, N, D, UBase>, PoweredUnit<V, N2, D2, UBase2> >::DivideType operator/(const PoweredUnit<V, N2, D2, UBase2>& u) const
+    constexpr typename ::internals::TransformUnit<PoweredUnit<U, N, D, UBase>, PoweredUnit<V, N2, D2, UBase2> >::DivideType operator/(const PoweredUnit<V, N2, D2, UBase2>& u) const
     {
         using ReturnType = ::internals::TransformUnit<PoweredUnit<U, N, D, UBase>, PoweredUnit<V, N2, D2, UBase2> >;
 
@@ -1665,7 +1661,7 @@ public:
 
     // Divide by a ScaledUnit of another baseUnit -> Compose it
     template<typename V, int64 N2, int64 D2, typename UBase2>
-    typename ::internals::TransformUnit<PoweredUnit<U, N, D, UBase>, ScaledUnit<V, N2, D2, UBase2> >::DivideType operator/(const ScaledUnit<V, N2, D2, UBase2>& u) const
+    constexpr typename ::internals::TransformUnit<PoweredUnit<U, N, D, UBase>, ScaledUnit<V, N2, D2, UBase2> >::DivideType operator/(const ScaledUnit<V, N2, D2, UBase2>& u) const
     {
         using ReturnType = ::internals::TransformUnit<PoweredUnit<U, N, D, UBase>, ScaledUnit<V, N2, D2, UBase2> >;
 
@@ -1674,7 +1670,7 @@ public:
 
     // Divide by a ComposedUnit -> ComposedUnit
     template<typename U1, typename U2>
-    typename ::internals::TransformUnit<PoweredUnit<U, N, D, UBase>, ComposedUnit<U1, U2> >::DivideType operator/(const ComposedUnit<U1, U2>& u) const
+    constexpr typename ::internals::TransformUnit<PoweredUnit<U, N, D, UBase>, ComposedUnit<U1, U2> >::DivideType operator/(const ComposedUnit<U1, U2>& u) const
     {
         using ReturnType = ::internals::TransformUnit<PoweredUnit<U, N, D, UBase>, ComposedUnit<U1, U2> >;
 
@@ -1694,30 +1690,30 @@ public:
     ///////////////////////////
     // Constructors
     ///////////////////////////
-    explicit ComposedUnit(const double& val = 0.0)
+    constexpr explicit ComposedUnit(const double& val = 0.0)
         : Unit<ComposedUnit<U1, U2> >(val)
     {
     }
 
-    ComposedUnit(const ComposedUnit<U1, U2>& u)
+    constexpr ComposedUnit(const ComposedUnit<U1, U2>& u)
         : Unit<ComposedUnit<U1, U2> >(u.Value())
     {
     }
 
     template<typename V1, typename V2>
-    ComposedUnit(const ComposedUnit<V1, V2>& u, typename ::internals::EnableIf< ::internals::IsEquivalent<ComposedUnit<U1, U2>, ComposedUnit<V1, V2> >::Result>::EnableType* dummy = 0)
+    constexpr ComposedUnit(const ComposedUnit<V1, V2>& u, typename ::internals::EnableIf< ::internals::IsEquivalent<ComposedUnit<U1, U2>, ComposedUnit<V1, V2> >::Result>::EnableType* dummy = 0)
         : Unit<ComposedUnit<U1, U2> >(u.Value() * ::internals::IsEquivalent<ComposedUnit<U1, U2>, ComposedUnit<V1, V2> >::GetFactor())
     {
     }
 
     // From a PoweredUnit (1/1) of a ComposedUnit same as this one -> Just the ComposedUnit
-    ComposedUnit(const PoweredUnit<ComposedUnit<U1, U2>, 1, 1, ComposedUnit<U1, U2> >& u)
+    constexpr ComposedUnit(const PoweredUnit<ComposedUnit<U1, U2>, 1, 1, ComposedUnit<U1, U2> >& u)
         : Unit<ComposedUnit<U1, U2> >(u.Value())
     {
     }
 
     template<typename U, int64 N, int64 D>
-    ComposedUnit(const ScaledUnit<U, N, D, ComposedUnit<U1, U2> >& u)
+    constexpr ComposedUnit(const ScaledUnit<U, N, D, ComposedUnit<U1, U2> >& u)
         : Unit<ComposedUnit<U1, U2> >(::internals::ChangeFactor< ComposedUnit<U1, U2>, ScaledUnit<U, N, D, ComposedUnit<U1, U2> > >::GetValue(u.Value()))
     {
     }
@@ -1729,7 +1725,7 @@ public:
     using Unit<ComposedUnit<U1, U2> >::operator=;
 
     template<typename V1, typename V2>
-    typename ::internals::EnableIf< ::internals::IsEquivalent<ComposedUnit<U1, U2>, ComposedUnit<V1, V2> >::Result, ComposedUnit<U1, U2> >::EnableType& operator=(const ComposedUnit<V1, V2>& v)
+    constexpr typename ::internals::EnableIf< ::internals::IsEquivalent<ComposedUnit<U1, U2>, ComposedUnit<V1, V2> >::Result, ComposedUnit<U1, U2> >::EnableType& operator=(const ComposedUnit<V1, V2>& v)
     {
         double changeFactor = ::internals::IsEquivalent<ComposedUnit<U1, U2>, ComposedUnit<V1, V2> >::GetFactor();
         Unit<ComposedUnit<U1, U2> >::m_value = v.Value() * changeFactor;
@@ -1745,7 +1741,7 @@ public:
 
     // Multiply by Another Unit -> ComposedUnit
     template<typename V>
-    typename ::internals::EnableIf< ::internals::IsUnit<V>::Result, typename ::internals::TransformUnit<ComposedUnit<U1, U2>, V>::MultiplyType>::EnableType operator*(const V& u) const
+    constexpr typename ::internals::EnableIf< ::internals::IsUnit<V>::Result, typename ::internals::TransformUnit<ComposedUnit<U1, U2>, V>::MultiplyType>::EnableType operator*(const V& u) const
     {
         using ReturnType = ::internals::TransformUnit<ComposedUnit<U1, U2>, V>;
 
@@ -1753,7 +1749,7 @@ public:
     }
 
     // Multiply by self -> PoweredUnit
-    typename ::internals::TransformUnit<ComposedUnit<U1, U2>, ComposedUnit<U1, U2> >::MultiplyType operator*(const ComposedUnit<U1, U2>& u) const
+    constexpr typename ::internals::TransformUnit<ComposedUnit<U1, U2>, ComposedUnit<U1, U2> >::MultiplyType operator*(const ComposedUnit<U1, U2>& u) const
     {
         using ReturnType = typename ::internals::TransformUnit<ComposedUnit<U1, U2>, ComposedUnit<U1, U2> >::MultiplyType;
 
@@ -1769,7 +1765,7 @@ public:
 
     // Divide by Another Unit -> ComposedUnit
     template<typename V>
-    typename ::internals::EnableIf< ::internals::IsUnit<V>::Result, typename ::internals::TransformUnit<ComposedUnit<U1, U2>, V>::DivideType>::EnableType operator/(const V& u) const
+    constexpr typename ::internals::EnableIf< ::internals::IsUnit<V>::Result, typename ::internals::TransformUnit<ComposedUnit<U1, U2>, V>::DivideType>::EnableType operator/(const V& u) const
     {
         using ReturnType = ::internals::TransformUnit<ComposedUnit<U1, U2>, V>;
 
@@ -1782,27 +1778,27 @@ public:
 // Global Unit operators functions
 ////////////////////////////////////////////
 template<typename U>
-typename ::internals::InversePower<U>::Type operator/(const Scalar& d, const Unit<U>& u)
+constexpr typename ::internals::InversePower<U>::Type operator/(const Scalar& d, const Unit<U>& u)
 {
-    return ::internals::InversePower<U>::Type(d.Value() / u.Value());
+    return typename ::internals::InversePower<U>::Type(d.Value() / u.Value());
 }
 
 template<typename F, typename U>
-typename ::internals::EnableIf< ::internals::IsArithmetic<F>::Result, typename ::internals::InversePower<U>::Type>::EnableType operator/(const F& f, const Unit<U>& u)
+constexpr typename ::internals::EnableIf< ::internals::IsArithmetic<F>::Result, typename ::internals::InversePower<U>::Type>::EnableType operator/(const F& f, const Unit<U>& u)
 {
-    return ::internals::InversePower<U>::Type(f / u.Value());
+    return typename ::internals::InversePower<U>::Type(f / u.Value());
 }
 
 template<typename U>
-typename ::internals::EnableIf< ::internals::IsUnit<U>::Result, typename ::internals::SqrtTransform<U>::Type>::EnableType sqrt(const U& u)
+constexpr typename ::internals::EnableIf< ::internals::IsUnit<U>::Result, typename ::internals::SqrtTransform<U>::Type>::EnableType sqrt(const U& u)
 {
-    return typename ::internals::SqrtTransform<U>::Type(sqrt(u.Value()));
+    return typename ::internals::SqrtTransform<U>::Type(std::sqrt(u.Value()));
 }
 
 template<int32 PowNum, int32 PowDen = 1, typename U>
-typename ::internals::EnableIf< ::internals::IsUnit<U>::Result, typename ::internals::PowerTransform<U, PowNum, PowDen>::Type>::EnableType pow(const Unit<U>& u)
+constexpr typename ::internals::EnableIf< ::internals::IsUnit<U>::Result, typename ::internals::PowerTransform<U, PowNum, PowDen>::Type>::EnableType pow(const Unit<U>& u)
 {
-    return typename ::internals::PowerTransform<U, PowNum, PowDen>::Type(pow(u.Value(), static_cast<double>(PowNum) / static_cast<double>(PowDen)));
+    return typename ::internals::PowerTransform<U, PowNum, PowDen>::Type(std::pow(u.Value(), static_cast<double>(PowNum) / static_cast<double>(PowDen)));
 }
 
 
@@ -1815,14 +1811,14 @@ class Vector
 public:
     constexpr static uint32 DIMENSION = 3;
 
-    Vector()
+    constexpr Vector()
     {
         v[0] = U(0.0);
         v[1] = U(0.0);
         v[2] = U(0.0);
     }
 
-    Vector(U xpos, U ypos, U zpos = U())
+    constexpr Vector(U xpos, U ypos, U zpos = U())
     {
         v[0] = xpos;
         v[1] = ypos;
@@ -1830,7 +1826,7 @@ public:
     }
 
     template<typename V>
-    Vector(const Vector<V>& u, typename ::internals::EnableIf< ::internals::IsEquivalent<U, V>::Result>::EnableType* dummy = 0)
+    constexpr Vector(const Vector<V>& u, typename ::internals::EnableIf< ::internals::IsEquivalent<U, V>::Result>::EnableType* dummy = 0)
     {
         double changeFactor = ::internals::IsEquivalent<U, V>::GetFactor();
         v[0] = U(u.x().Value() * changeFactor);
@@ -1838,55 +1834,55 @@ public:
         v[2] = U(u.z().Value() * changeFactor);
     }
 
-    const U* constData() const { return v; }
+    constexpr const U* constData() const { return v; }
 
-    bool isNull() const
+    constexpr bool isNull() const
     {
         U tresshold = U(0.0000000001);
         return abs(v[0]) < tresshold && abs(v[1]) < tresshold && abs(v[2]) < tresshold;
     }
 
-    inline U x() const { return v[0]; }
-    inline U y() const { return v[1]; }
-    inline U z() const { return v[2]; }
+    constexpr inline U x() const { return v[0]; }
+    constexpr inline U y() const { return v[1]; }
+    constexpr inline U z() const { return v[2]; }
 
-    inline void setX(U aX) { v[0] = aX; }
-    inline void setY(U aY) { v[1] = aY; }
-    inline void setZ(U aZ) { v[2] = aZ; }
+    constexpr inline void setX(U aX) { v[0] = aX; }
+    constexpr inline void setY(U aY) { v[1] = aY; }
+    constexpr inline void setZ(U aZ) { v[2] = aZ; }
 
-    U& operator[](unsigned int idx)
+    constexpr U& operator[](unsigned int idx)
     {
-        return (idx < DIMENSION) ? v[idx] : v[0];
+        return v[idx];
     }
 
-    U operator[](unsigned int idx) const
+    constexpr U operator[](unsigned int idx) const
     {
-        return (idx < DIMENSION) ? v[idx] : v[0];
+        return v[idx];
     }
 
-    U length() const
+    constexpr U length() const
     {
         return sqrt(lengthSquared());
     }
 
-    typename ::internals::TransformUnit<U, U>::MultiplyType lengthSquared() const
+    constexpr typename ::internals::TransformUnit<U, U>::MultiplyType lengthSquared() const
     {
         return dotProduct(*this, *this);
     }
 
-    Vector<Scalar> normalized() const
+    constexpr Vector<Scalar> normalized() const
     {
         double len = dLenSquare();
 
         if (len - 1.0 == 0.0)
-            return Vector<Scalar>(Scalar(v[0].Value()), Scalar(v[1].Value()), Scalar(v[2].Value()));
+            return Vector<Scalar>(Scalar((double)v[0]), Scalar((double)v[1]), Scalar((double)v[2]));
         else if (len > 0.0)
             return *this / length();
         else
             return Vector<Scalar>();
     }
 
-    void correct()
+    constexpr void correct()
     {
         if (isNull())
         {
@@ -1897,13 +1893,13 @@ public:
     }
 
     template<typename U2>
-    static typename ::internals::TransformUnit<U, U2>::MultiplyType dotProduct(const Vector<U>& v1, const Vector<U2>& v2)
+    constexpr static typename ::internals::TransformUnit<U, U2>::MultiplyType dotProduct(const Vector<U>& v1, const Vector<U2>& v2)
     {
         return v1.dotProduct(v2);
     }
 
     template<typename U2>
-    typename ::internals::TransformUnit<U, U2>::MultiplyType dotProduct(const Vector<U2>& v2) const
+    constexpr typename ::internals::TransformUnit<U, U2>::MultiplyType dotProduct(const Vector<U2>& v2) const
     {
         using UnitTransformType = ::internals::TransformUnit<U, U2>;
         using ReturnType = typename UnitTransformType::MultiplyType;
@@ -1912,13 +1908,13 @@ public:
     }
 
     template<typename U2>
-    static Vector<typename ::internals::TransformUnit<U, U2>::MultiplyType> crossProduct(const Vector<U>& v1, const Vector<U2>& v2)
+    constexpr static Vector<typename ::internals::TransformUnit<U, U2>::MultiplyType> crossProduct(const Vector<U>& v1, const Vector<U2>& v2)
     {
         return v1.crossProduct(v2);
     }
 
     template<typename U2>
-    Vector<typename ::internals::TransformUnit<U, U2>::MultiplyType> crossProduct(const Vector<U2>& v2)
+    constexpr Vector<typename ::internals::TransformUnit<U, U2>::MultiplyType> crossProduct(const Vector<U2>& v2)
     {
         return Vector<typename ::internals::TransformUnit<U, U2>::MultiplyType>(v[1] * v2.z() - v[2] * v2.y(),
             v[2] * v2.x() - v[0] * v2.z(),
@@ -1926,7 +1922,7 @@ public:
     }
 
     template<typename U2>
-    static Vector<Scalar> normal(const Vector<U>& v1, const Vector<U2>& v2)
+    constexpr static Vector<Scalar> normal(const Vector<U>& v1, const Vector<U2>& v2)
     {
         return crossProduct(v1, v2).normalized();
     }
@@ -1935,7 +1931,7 @@ public:
     // Assignation operators
     //////////////////////////////////////
     template<typename U2>
-    typename ::internals::EnableIf< ::internals::IsEquivalent<U, U2>::Result, Vector<U> >::EnableType& operator=(const Vector<U2>& vec)
+    constexpr typename ::internals::EnableIf< ::internals::IsEquivalent<U, U2>::Result, Vector<U> >::EnableType& operator=(const Vector<U2>& vec)
     {
         v[0] = vec.x();
         v[1] = vec.y();
@@ -1947,7 +1943,7 @@ public:
     // Coumpound assigment operators
     //////////////////////////////////////
     template<typename U2>
-    typename ::internals::EnableIf< ::internals::IsEquivalent<U, U2>::Result, Vector<U> >::EnableType &operator+=(const Vector<U2> &vector)
+    constexpr typename ::internals::EnableIf< ::internals::IsEquivalent<U, U2>::Result, Vector<U> >::EnableType &operator+=(const Vector<U2> &vector)
     {
         v[0] += vector.x();
         v[1] += vector.y();
@@ -1956,7 +1952,7 @@ public:
     }
 
     template<typename U2>
-    typename ::internals::EnableIf< ::internals::IsEquivalent<U, U2>::Result, Vector<U> >::EnableType &operator-=(const Vector<U2> &vector)
+    constexpr typename ::internals::EnableIf< ::internals::IsEquivalent<U, U2>::Result, Vector<U> >::EnableType &operator-=(const Vector<U2> &vector)
     {
         v[0] -= vector.x();
         v[1] -= vector.y();
@@ -1965,7 +1961,7 @@ public:
     }
 
     template<typename F>
-    typename ::internals::EnableIf< ::internals::IsArithmetic<F>::Result, Vector<U>&>::EnableType operator*=(const F& factor)
+    constexpr typename ::internals::EnableIf< ::internals::IsArithmetic<F>::Result, Vector<U>&>::EnableType operator*=(const F& factor)
     {
         v[0] *= factor;
         v[1] *= factor;
@@ -1974,7 +1970,7 @@ public:
     }
 
     template<typename F>
-    typename ::internals::EnableIf< ::internals::IsArithmetic<F>::Result, Vector<U>&>::EnableType operator/=(const F& divisor)
+    constexpr typename ::internals::EnableIf< ::internals::IsArithmetic<F>::Result, Vector<U>&>::EnableType operator/=(const F& divisor)
     {
         v[0] /= divisor;
         v[1] /= divisor;
@@ -1986,13 +1982,13 @@ public:
     // Equality operators
     //////////////////////////////////////
     template<typename U2>
-    typename ::internals::EnableIf< ::internals::IsEquivalent<U, U2>::Result, bool>::EnableType operator==(const Vector<U2> &v2) const
+    constexpr typename ::internals::EnableIf< ::internals::IsEquivalent<U, U2>::Result, bool>::EnableType operator==(const Vector<U2> &v2) const
     {
         return v[0] == v2.x() && v[1] == v2.y() && v[2] == v2.z();
     }
 
     template<typename U2>
-    typename ::internals::EnableIf< ::internals::IsEquivalent<U, U2>::Result, bool>::EnableType operator!=(const Vector<U2> &v2) const
+    constexpr typename ::internals::EnableIf< ::internals::IsEquivalent<U, U2>::Result, bool>::EnableType operator!=(const Vector<U2> &v2) const
     {
         return !(*this == v2);
     }
@@ -2002,13 +1998,13 @@ public:
     // Addition/Substraction operators
     //////////////////////////////////////
     template<typename U2>
-    typename ::internals::EnableIf< ::internals::IsEquivalent<U, U2>::Result, Vector<U> >::EnableType operator+(const Vector<U2> &v2) const
+    constexpr typename ::internals::EnableIf< ::internals::IsEquivalent<U, U2>::Result, Vector<U> >::EnableType operator+(const Vector<U2> &v2) const
     {
         return Vector<U>(v[0] + v2.x(), v[1] + v2.y(), v[2] + v2.z());
     }
 
     template<typename U2>
-    typename ::internals::EnableIf< ::internals::IsEquivalent<U, U2>::Result, Vector<U> >::EnableType operator-(const Vector<U2> &v2) const
+    constexpr typename ::internals::EnableIf< ::internals::IsEquivalent<U, U2>::Result, Vector<U> >::EnableType operator-(const Vector<U2> &v2) const
     {
         return Vector<U>(v[0] - v2.x(), v[1] - v2.y(), v[2] - v2.z());
     }
@@ -2019,14 +2015,14 @@ public:
     //////////////////////////////////////
     // Vector<U> *  double
     template<typename F>
-    typename ::internals::EnableIf< ::internals::IsArithmetic<F>::Result, Vector<U> >::EnableType operator*(const F& factor) const
+    constexpr typename ::internals::EnableIf< ::internals::IsArithmetic<F>::Result, Vector<U> >::EnableType operator*(const F& factor) const
     {
         return Vector<U>(v[0] * factor, v[1] * factor, v[2] * factor);
     }
 
     // Vector<U> * V
     template<typename V>
-    typename ::internals::EnableIf< ::internals::IsUnit<V>::Result || ::internals::IsScalar<V>::Result, Vector<typename ::internals::TransformUnit<U, V>::MultiplyType> >::EnableType operator*(const V& u) const
+    constexpr typename ::internals::EnableIf< ::internals::IsUnit<V>::Result || ::internals::IsScalar<V>::Result, Vector<typename ::internals::TransformUnit<U, V>::MultiplyType> >::EnableType operator*(const V& u) const
     {
         using UnitTransformType = ::internals::TransformUnit<U, V>;
         using ReturnType = typename ::internals::TransformUnit<U, V>::MultiplyType;
@@ -2035,7 +2031,7 @@ public:
     }
 
     // Vector<U> * Vector<double> Component multiplication
-    Vector<U> operator*(const Vector<Scalar> &v2) const
+    constexpr Vector<U> operator*(const Vector<Scalar> &v2) const
     {
         return Vector<U>(v[0] * v2.x(), v[1] * v2.y(), v[2] * v2.z());
     }
@@ -2045,7 +2041,7 @@ public:
     //////////////////////////////////////
     // Vector<U> / V
     template<typename V>
-    typename ::internals::EnableIf< ::internals::IsUnit<V>::Result || ::internals::IsScalar<V>::Result, Vector<typename ::internals::TransformUnit<U, V>::DivideType> >::EnableType operator/(const V& u) const
+    constexpr typename ::internals::EnableIf< ::internals::IsUnit<V>::Result || ::internals::IsScalar<V>::Result, Vector<typename ::internals::TransformUnit<U, V>::DivideType> >::EnableType operator/(const V& u) const
     {
         using UnitTransformType = ::internals::TransformUnit<U, V>;
         using ReturnType = typename ::internals::TransformUnit<U, V>::DivideType;
@@ -2055,7 +2051,7 @@ public:
 
     // Vector<U> / double
     template<typename F>
-    typename ::internals::EnableIf< ::internals::IsArithmetic<F>::Result, Vector<U> >::EnableType operator/(const F& divisor)
+    constexpr typename ::internals::EnableIf< ::internals::IsArithmetic<F>::Result, Vector<U> >::EnableType operator/(const F& divisor)
     {
         return Vector<U>(v[0] / divisor, v[1] / divisor, v[2] / divisor);
     }
@@ -2063,7 +2059,7 @@ public:
     //////////////////////////////////////
     // Other operator functions
     //////////////////////////////////////
-    Vector<U> operator-() const
+    constexpr Vector<U> operator-() const
     {
         return Vector<U>(-v[0], -v[1], -v[2]);
     }
@@ -2072,34 +2068,34 @@ public:
     // Components functions
     //////////////////////////////////////
     template <typename U2>
-    Vector<U> ParallelComponent(const Vector<U2>& v1) const
+    constexpr Vector<U> ParallelComponent(const Vector<U2>& v1) const
     {
         return (dotProduct(v1) / v1.lengthSquared()) * v1;
     }
 
     template <typename U2>
-    Vector<U> PerpendicularComponent(const Vector<U2>& v1) const
+    constexpr Vector<U> PerpendicularComponent(const Vector<U2>& v1) const
     {
         return *this - ParallelComponent(v1);
     }
 
     // Transform to scalar vector (remove units)
-    Vector<Scalar> ToScalar() const
+    constexpr Vector<Scalar> ToScalar() const
     {
-        return Vector<Scalar>(Scalar(v[0].Value()), Scalar(v[1].Value()), Scalar(v[2].Value()));
+        return Vector<Scalar>(Scalar((double)v[0]), Scalar((double)v[1]), Scalar((double)v[2]));
     }
 
 private:
-    Vector(double x, double y, double z, int dummy)
+    constexpr Vector(double x, double y, double z, int dummy)
     {
         v[0] = U(x);
         v[1] = U(y);
         v[2] = U(z);
     }
 
-    double dLenSquare() const
+    constexpr double dLenSquare() const
     {
-        return v[0].Value() * v[0].Value() + v[1].Value() * v[1].Value() + v[2].Value() * v[2].Value();
+        return (double)v[0] * (double)v[0] + (double)v[1] * (double)v[1] + (double)v[2] * (double)v[2];
     }
 
     U v[DIMENSION];
@@ -2111,14 +2107,14 @@ private:
 ////////////////////////////////////////////
 // double * Vector<U>
 template<typename F, typename U>
-typename ::internals::EnableIf< ::internals::IsArithmetic<F>::Result, Vector<U> >::EnableType operator*(const F& factor, const Vector<U> &vector)
+constexpr typename ::internals::EnableIf< ::internals::IsArithmetic<F>::Result, Vector<U> >::EnableType operator*(const F& factor, const Vector<U> &vector)
 {
     return vector * factor;
 }
 
 // Unit * Vector<U>
 template<typename U, typename V>
-typename ::internals::EnableIf< ::internals::IsUnit<U>::Result || ::internals::IsScalar<U>::Result, Vector<typename ::internals::TransformUnit<V, U>::MultiplyType> >::EnableType operator*(const U& u, const Vector<V>& v)
+constexpr typename ::internals::EnableIf< ::internals::IsUnit<U>::Result || ::internals::IsScalar<U>::Result, Vector<typename ::internals::TransformUnit<V, U>::MultiplyType> >::EnableType operator*(const U& u, const Vector<V>& v)
 {
     return v * u;
 }
@@ -2129,16 +2125,322 @@ typename ::internals::EnableIf< ::internals::IsUnit<U>::Result || ::internals::I
 //    For Unit and Vector
 ////////////////////////////////////////////
 template<typename U>
-typename ::internals::EnableIf< ::internals::IsUnit<U>::Result, U>::EnableType abs(const U& u)
+constexpr typename ::internals::EnableIf< ::internals::IsUnit<U>::Result, U>::EnableType abs(const U& u)
 {
-    return U(abs(u.Value()));
+    return U(std::abs((double)u));
 }
 
 template<typename U>
-Vector<U> abs(const Vector<U>& v)
+constexpr Vector<U> abs(const Vector<U>& v)
 {
     return Vector<U>(abs(v.x()), abs(v.y()), abs(v.z()));
 }
+
+
+/*template<typename U>
+class Matrix
+{
+public:
+    Matrix()
+    {
+        m[0][0] = U(0.0);
+        m[1][0] = U(0.0);
+        m[2][0] = U(0.0);
+
+        m[0][1] = U(0.0);
+        m[1][1] = U(0.0);
+        m[2][1] = U(0.0);
+
+        m[0][2] = U(0.0);
+        m[1][2] = U(0.0);
+        m[2][2] = U(0.0);
+    }
+
+    Matrix(U m11, U m12, U m13, U m21, U m22, U m23, U m31, U m32, U m33)
+    {
+        m[0][0] = m11;
+        m[1][0] = m21;
+        m[2][0] = m31;
+
+        m[0][1] = m12;
+        m[1][1] = m22;
+        m[2][1] = m32;
+
+        m[0][2] = m13;
+        m[1][2] = m23;
+        m[2][2] = m33;
+    }
+
+    template<typename V>
+    Matrix(const Matrix<V>& u, typename ::internals::EnableIf< ::internals::IsEquivalent<U, V>::Result>::EnableType* dummy = 0)
+    {
+        m[0][0] = U(u[0][0]);
+        m[1][0] = U(u[1][0]);
+        m[2][0] = U(u[2][0]);
+
+        m[0][1] = U(u[0][1]);
+        m[1][1] = U(u[1][1]);
+        m[2][1] = U(u[2][1]);
+
+        m[0][2] = U(u[0][2]);
+        m[1][2] = U(u[1][2]);
+        m[2][2] = U(u[2][2]);
+    }
+
+    const U* constData() const { return m; }
+
+    bool isIdentity() const
+    {
+        U tresshold = U(0.0000000001);
+        return abs(U(1) - m[0][0]) < tresshold && abs(U(1) - m[1][1]) < tresshold && abs(U(1) - m[2][2]) < tresshold;
+    }
+
+    U[]& operator[](unsigned int idx)
+    {
+        return m[idx];
+    }
+
+    const U[]& operator[](unsigned int idx) const
+    {
+        return m[idx];
+    }
+
+    //////////////////////////////////////
+    // Assignation operators
+    //////////////////////////////////////
+    template<typename U2>
+    typename ::internals::EnableIf< ::internals::IsEquivalent<U, U2>::Result, Matrix<U> >::EnableType& operator=(const Matrix<U2>& mat)
+    {
+        m[0][0] = mat[0][0];
+        m[1][0] = mat[1][0];
+        m[2][0] = mat[2][0];
+
+        m[0][1] = mat[0][1];
+        m[1][1] = mat[1][1];
+        m[2][1] = mat[2][1];
+
+        m[0][2] = mat[0][2];
+        m[1][2] = mat[1][2];
+        m[2][2] = mat[2][2];
+
+        return *this;
+    }
+
+    //////////////////////////////////////
+    // Coumpound assigment operators
+    //////////////////////////////////////
+    template<typename U2>
+    typename ::internals::EnableIf< ::internals::IsEquivalent<U, U2>::Result, Matrix<U> >::EnableType &operator+=(const Matrix<U2> &mat)
+    {
+        m[0][0] += mat[0][0];
+        m[1][0] += mat[1][0];
+        m[2][0] += mat[2][0];
+
+        m[0][1] += mat[0][1];
+        m[1][1] += mat[1][1];
+        m[2][1] += mat[2][1];
+
+        m[0][2] += mat[0][2];
+        m[1][2] += mat[1][2];
+        m[2][2] += mat[2][2];
+        return *this;
+    }
+
+    template<typename U2>
+    typename ::internals::EnableIf< ::internals::IsEquivalent<U, U2>::Result, Matrix<U> >::EnableType &operator-=(const Matrix<U2> &mat)
+    {
+        m[0][0] -= mat[0][0];
+        m[1][0] -= mat[1][0];
+        m[2][0] -= mat[2][0];
+
+        m[0][1] -= mat[0][1];
+        m[1][1] -= mat[1][1];
+        m[2][1] -= mat[2][1];
+
+        m[0][2] -= mat[0][2];
+        m[1][2] -= mat[1][2];
+        m[2][2] -= mat[2][2];
+        return *this;
+    }
+
+    template<typename F>
+    typename ::internals::EnableIf< ::internals::IsArithmetic<F>::Result, Matrix<U>&>::EnableType operator*=(const F& factor)
+    {
+        m[0][0] *= factor;
+        m[1][0] *= factor;
+        m[2][0] *= factor;
+
+        m[0][1] *= factor;
+        m[1][1] *= factor;
+        m[2][1] *= factor;
+
+        m[0][2] *= factor;
+        m[1][2] *= factor;
+        m[2][2] *= factor;
+        return *this;
+    }
+
+    template<typename F>
+    typename ::internals::EnableIf< ::internals::IsArithmetic<F>::Result, Vector<U>&>::EnableType operator/=(const F& divisor)
+    {
+        m[0][0] /= factor;
+        m[1][0] /= factor;
+        m[2][0] /= factor;
+
+        m[0][1] /= factor;
+        m[1][1] /= factor;
+        m[2][1] /= factor;
+
+        m[0][2] /= factor;
+        m[1][2] /= factor;
+        m[2][2] /= factor;
+        return *this;
+    }
+
+    //////////////////////////////////////
+    // Equality operators
+    //////////////////////////////////////
+    template<typename U2>
+    typename ::internals::EnableIf< ::internals::IsEquivalent<U, U2>::Result, bool>::EnableType operator==(const Matrix<U2> &mat) const
+    {
+        return m[0][0] == mat[0][0] &&
+            m[1][0] == mat[1][0] &&
+            m[2][0] == mat[2][0] &&
+
+            m[0][1] == mat[0][1] &&
+            m[1][1] == mat[1][1] &&
+            m[2][1] == mat[2][1] &&
+
+            m[0][2] == mat[0][2] &&
+            m[1][2] == mat[1][2] &&
+            m[2][2] == mat[2][2];
+    }
+
+    template<typename U2>
+    typename ::internals::EnableIf< ::internals::IsEquivalent<U, U2>::Result, bool>::EnableType operator!=(const Matrix<U2> &mat) const
+    {
+        return !(*this == mat);
+    }
+
+
+    //////////////////////////////////////
+    // Addition/Substraction operators
+    //////////////////////////////////////
+    template<typename U2>
+    typename ::internals::EnableIf< ::internals::IsEquivalent<U, U2>::Result, Matrix<U> >::EnableType operator+(const Matrix<U2> &mat) const
+    {
+        return Matrix<U>(m[0][0] + mat[0][0],
+            m[1][0] + mat[1][0],
+            m[2][0] + mat[2][0],
+            m[0][1] + mat[0][1],
+            m[1][1] + mat[1][1],
+            m[2][1] + mat[2][1],
+            m[0][2] + mat[0][2],
+            m[1][2] + mat[1][2],
+            m[2][2] + mat[2][2]);
+    }
+
+    template<typename U2>
+    typename ::internals::EnableIf< ::internals::IsEquivalent<U, U2>::Result, Matrix<U> >::EnableType operator-(const Matrix<U2> &v2) const
+    {
+        return Matrix<U>(m[0][0] - mat[0][0],
+            m[1][0] - mat[1][0],
+            m[2][0] - mat[2][0],
+            m[0][1] - mat[0][1],
+            m[1][1] - mat[1][1],
+            m[2][1] - mat[2][1],
+            m[0][2] - mat[0][2],
+            m[1][2] - mat[1][2],
+            m[2][2] - mat[2][2]);
+    }
+
+
+    //////////////////////////////////////
+    // Multiplication operators
+    //////////////////////////////////////
+    // Matrix<U> *  double
+    template<typename F>
+    typename ::internals::EnableIf< ::internals::IsArithmetic<F>::Result, Vector<U> >::EnableType operator*(const F& factor) const
+    {
+        return Matrix<U>(m[0][0] * factor,
+        m[1][0] * factor,
+        m[2][0] * factor,
+        m[0][1] * factor,
+        m[1][1] * factor,
+        m[2][1] * factor,
+        m[0][2] * factor,
+        m[1][2] * factor,
+        m[2][2] * factor);
+    }
+
+    // Matrix<U> * V
+    template<typename V>
+    typename ::internals::EnableIf< ::internals::IsUnit<V>::Result || ::internals::IsScalar<V>::Result, Matrix<typename ::internals::TransformUnit<U, V>::MultiplyType> >::EnableType operator*(const V& u) const
+    {
+        using UnitTransformType = ::internals::TransformUnit<U, V>;
+        using ReturnType = typename ::internals::TransformUnit<U, V>::MultiplyType;
+
+        return Matrix<ReturnType>(UnitTransformType::Multiply(m[0][0], u), UnitTransformType::Multiply(m[0][1], u), UnitTransformType::Multiply(m[0][2], u),
+            UnitTransformType::Multiply(m[1][0], u), UnitTransformType::Multiply(m[1][1], u), UnitTransformType::Multiply(m[1][2], u),
+            UnitTransformType::Multiply(m[2][0], u), UnitTransformType::Multiply(m[2][1], u), UnitTransformType::Multiply(m[2][2], u));
+    }
+
+    // Matrix<U> * Vector<U> 
+    Vector<typename ::internals::TransformUnit<U, U>::MultiplyType> operator*(const Vector<U> &v2) const
+    {
+        using UnitTransformType = ::internals::TransformUnit<U, V>;
+        using ReturnType = typename ::internals::TransformUnit<U, V>::MultiplyType;
+        return Vector<ReturnType>(UnitTransformType::Multiply(v2.x(), m[0][0]) + UnitTransformType::Multiply(v2.y(), m[0][1]) + UnitTransformType::Multiply(v2.z(), m[0][2]), 
+                                  UnitTransformType::Multiply(v2.x(), m[1][0]) + UnitTransformType::Multiply(v2.y(), m[1][1]) + UnitTransformType::Multiply(v2.z(), m[1][2]),
+                                  UnitTransformType::Multiply(v2.x(), m[2][0]) + UnitTransformType::Multiply(v2.y(), m[2][1]) + UnitTransformType::Multiply(v2.z(), m[2][2]));
+    }
+
+    //////////////////////////////////////
+    // Division operators
+    //////////////////////////////////////
+    // Vector<U> / V
+    template<typename V>
+    typename ::internals::EnableIf< ::internals::IsUnit<V>::Result || ::internals::IsScalar<V>::Result, Matrix<typename ::internals::TransformUnit<U, V>::DivideType> >::EnableType operator/(const V& u) const
+    {
+        using UnitTransformType = ::internals::TransformUnit<U, V>;
+        using ReturnType = typename ::internals::TransformUnit<U, V>::DivideType;
+
+        return Matrix<ReturnType>(UnitTransformType::Divide(m[0][0], u), UnitTransformType::Divide(m[0][1], u), UnitTransformType::Divide(m[0][2], u),
+            UnitTransformType::Divide(m[1][0], u), UnitTransformType::Divide(m[1][1], u), UnitTransformType::Divide(m[1][2], u),
+            UnitTransformType::Divide(m[2][0], u), UnitTransformType::Divide(m[2][1], u), UnitTransformType::Divide(m[2][2], u));
+    }
+
+    // Matrix<U> / double
+    template<typename F>
+    typename ::internals::EnableIf< ::internals::IsArithmetic<F>::Result, Matrix<U> >::EnableType operator/(const F& divisor)
+    {
+        return Matrix<U>(m[0][0] / divisor,
+            m[1][0] / divisor,
+            m[2][0] / divisor,
+            m[0][1] / divisor,
+            m[1][1] / divisor,
+            m[2][1] / divisor,
+            m[0][2] / divisor,
+            m[1][2] / divisor,
+            m[2][2] / divisor);
+    }
+
+    //////////////////////////////////////
+    // Other operator functions
+    //////////////////////////////////////
+
+    
+    // Transform to scalar vector (remove units)
+    Matrix<Scalar> ToScalar() const
+    {
+        return Vector<Scalar>(Scalar((double)m[0][0]), Scalar((double)m[0][1]), Scalar((double)m[0][2]),
+            Scalar((double)m[1][0]), Scalar((double)m[1][1]), Scalar((double)m[1][2]),
+            Scalar((double)m[2][0]), Scalar((double)m[2][1]), Scalar((double)m[2][2]));
+    }
+
+private:
+    U[3][3] m;
+};*/
 
 
 ////////////////////////////////////////////
@@ -2156,9 +2458,9 @@ S& operator<<(S& os, const Unit<U>& u)
 template<typename S, typename V>
 S& operator<<(S& os, const Vector<V>& v)
 {
-    os << '(' << v.x();
-    os << ", " << v.y();
-    os << ", " << v.z();
+    os << '(' << (double)v.x();
+    os << ", " << (double)v.y();
+    os << ", " << (double)v.z();
     os << ')';
     return os;
 }
@@ -2463,7 +2765,7 @@ using Angstrom = ScaledUnit<Metre, 1, 10000000000>;
 struct angleBase;
 
 using Radian = standard<angleBase>::Type;
-using Degree = ScaledUnit<Radian, 3141593, 180000000>;
+using Degree = ScaledUnit<Radian, 31415926535897932, 1800000000000000000>;
 
 UNIT_DISPLAY_NAME(Radian, "Radian")
 UNIT_DISPLAY_NAME(Degree, "Degree")
