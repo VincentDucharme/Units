@@ -2,7 +2,7 @@
 C++ Library for managing values with units
 
 
-This standalone file allows you to use variable with units. The library is very useful for physical and chemical simulations. 
+This standalone file allows you to use variables with units. The library is very useful for physical and chemical simulations. 
 
 Very simple and intuitive to use, this library can save you a lot of trouble finding your errors in formulas.
 
@@ -27,7 +27,6 @@ int main()
 }
 ```
 
-# To be added soon :
+# To be added :
 - Complete tutorials and documentation
-- Math helper library using Units (mainly useful for trigonometry)
 
